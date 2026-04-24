@@ -45,7 +45,16 @@ while running:
                     running = False
                 elif event.key in keybinds.up:
                     # handle up
-                    pass
+                    player.y -= 10
+                elif event.key in keybinds.down:
+                    # handle down
+                    player.y += 10
+                elif event.key in keybinds.left:
+                    # handle left
+                    player.x -= 10
+                elif event.key in keybinds.right:
+                    # handle right
+                    player.x += 10
 
                 # match event.key:
                 #     case keybinds.exit:

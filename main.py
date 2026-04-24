@@ -83,13 +83,18 @@ while running:
         running = False
     if any(keys[k] for k in keybinds.up):
         # Multiply by dt to make 10 px / s
-        player.y -= player.speed * delta_time
+        # player.y -= player.speed * delta_time
+        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation, player.speed * delta_time)
     if any(keys[k] for k in keybinds.down):
-        player.y += player.speed * delta_time
+        # player.y += player.speed * delta_time
+        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation + 180, player.speed * delta_time)
     if any(keys[k] for k in keybinds.left):
-        player.x -= player.speed * delta_time
+        # player.x -= player.speed * delta_time
+        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation - 90, player.speed * delta_time)
     if any(keys[k] for k in keybinds.right):
-        player.x += player.speed * delta_time
+        # player.x += player.speed * delta_time
+        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation + 90, player.speed * delta_time)
+
 
     # Frame process logic
 
@@ -110,7 +115,7 @@ while running:
 
     # pygame.draw.polygon(screen, (255, 255, 255, 10), [(player.x + 10, player.y + 10), (player.x + 10 + view_left_direction[0]*player.view_distance, player.y + 10 + view_left_direction[1]*player.view_distance), (player.x + 10 + view_right_direction[0]*player.view_distance, player.y + 10 + view_right_direction[1]*player.view_distance)])
 
-    pygame.draw.rect(screen, player.color, (player.x, player.y, player.size_x, player.size_y))
+    pygame.draw.rect(screen, player.color, (player.x - player.size_x//2, player.y - player.size_y//2, player.size_x, player.size_y))
 
     pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
 
@@ -118,9 +123,9 @@ while running:
     overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
 
     points = [
-        (player.x + 10, player.y + 10), 
-        (player.x + 10 + view_left_direction[0]*player.view_distance, player.y + 10 + view_left_direction[1]*player.view_distance), 
-        (player.x + 10 + view_right_direction[0]*player.view_distance, player.y + 10 + view_right_direction[1]*player.view_distance)
+        (player.x, player.y), 
+        (player.x + view_left_direction[0]*player.view_distance, player.y + view_left_direction[1]*player.view_distance), 
+        (player.x + view_right_direction[0]*player.view_distance, player.y + view_right_direction[1]*player.view_distance)
     ]
     pygame.draw.polygon(overlay, (255, 255, 255, 50), points)
 

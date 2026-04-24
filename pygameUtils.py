@@ -15,12 +15,16 @@ PURPLE = (255, 0, 255)
 GREEN = (0, 255, 0)
 NONE = (0, 0, 0)
 
-def render_text(text, pos, canv):
-    # text_surface = pygame.surface(pygame.SRCALPHA)
-    text_surface = font.render(str(text), False, BLACK)
-    # text_surface = text_surface.convert_alpha()
+def render_text(text, pos, color, canv, size=1, center=False, transparent=False):
+    font_obj = pygame.font.SysFont(None, size) 
+    if transparent:
+        text_surface = pygame.surface(pygame.SRCALPHA)
+        text_surface = text_surface.convert_alpha()
+    else:
+        text_surface = font_obj.render(str(text), False, color)
     text_rect = text_surface.get_rect()
-    text_rect.center = (pos[0], pos[1])
+    if center:
+        text_rect.center = (pos[0], pos[1])
     canv.blit(text_surface, text_rect)
 
 def render_player_arrow(pos, ang, color, canv):

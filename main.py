@@ -2,6 +2,10 @@ import pygame
 from pygameUtils import *
 import keybinds
 
+pygame.init()
+clock = pygame.time.Clock()
+FPS = 60
+
 WIDTH, HEIGHT = 500, 400
 ORIGIN = [WIDTH//2, HEIGHT//2]
 
@@ -19,7 +23,7 @@ class Block():
         self.texture = texture
 
 class Player():
-    def __init__(self, x, y, sx, sy, color=(255, 50, 50), texture=None):
+    def __init__(self, x, y, sx, sy, color=(255, 50, 50), texture=None, speed=200):
         super().__init__()
         self.x = x
         self.y = y
@@ -27,6 +31,7 @@ class Player():
         self.sy = sy
         self.color = color
         self.texture = texture
+        self.speed = speed
 
 blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
 
@@ -35,38 +40,43 @@ player = Player(ORIGIN[0], ORIGIN[1], 20, 20)
 running = True
 
 while running:
+
+    delta_time = clock.tick(FPS) / 1000.0
+
     for event in pygame.event.get():
         match event.type:
             # Use a switch statment because its more effieient and easier to read than ifs
             case pygame.QUIT:
                 running = False
-            case pygame.KEYDOWN:
-                if event.key in keybinds.exit:
-                    running = False
-                elif event.key in keybinds.up:
-                    # handle up
-                    player.y -= 10
-                elif event.key in keybinds.down:
-                    # handle down
-                    player.y += 10
-                elif event.key in keybinds.left:
-                    # handle left
-                    player.x -= 10
-                elif event.key in keybinds.right:
-                    # handle right
-                    player.x += 10
+            # case pygame.KEYDOWN:
+            #     if event.key in keybinds.exit:
+            #         running = False
+            #     elif event.key in keybinds.up:
+            #         # handle up
+            #         player.y -= 10
+            #     elif event.key in keybinds.down:
+            #         # handle down
+            #         player.y += 10
+            #     elif event.key in keybinds.left:
+            #         # handle left
+            #         player.x -= 10
+            #     elif event.key in keybinds.right:
+            #         # handle right
+            #         player.x += 10
+    
+    keys = pygame.key.get_pressed()
 
-                # match event.key:
-                #     case keybinds.exit:
-                #         running = False
-                #     case keybinds.up:
-                #         pass
-                #     case keybinds.down:
-                #         pass
-                #     case keybinds.left:
-                #         pass
-                #     case keybinds.right:
-                #         pass
+    if any(keys[k] for k in keybinds.exit):
+        running = False
+    if any(keys[k] for k in keybinds.up):
+        # Multiply by dt to make 10 px / s
+        player.y -= player.speed * delta_time
+    if any(keys[k] for k in keybinds.down):
+        player.y += player.speed * delta_time
+    if any(keys[k] for k in keybinds.left):
+        player.x -= player.speed * delta_time
+    if any(keys[k] for k in keybinds.right):
+        player.x += player.speed * delta_time
 
     screen.fill((0, 0, 0))
 
@@ -75,4 +85,4 @@ while running:
 
     pygame.draw.rect(screen, player.color, (player.x, player.y, player.sx, player.sy))
 
-    pygame.display.flip()
+    pygame.display.update()

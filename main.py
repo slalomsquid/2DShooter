@@ -66,7 +66,25 @@ while running:
 
     keys = pygame.key.get_pressed()
 
-    player.handle_keys(keys, delta_time)
+    actions = []
+
+    held_actions = []
+
+    if any(keys[k] for k in keybinds.exit):
+        held_actions.append("exit")
+    if any(keys[k] for k in keybinds.up):
+        held_actions.append("up")
+    if any(keys[k] for k in keybinds.down):
+        held_actions.append("down")
+    if any(keys[k] for k in keybinds.left):
+        held_actions.append("left")
+    if any(keys[k] for k in keybinds.right):
+        held_actions.append("right")
+
+    if "exit" in held_actions:
+        running = False
+
+    player.handle_held(held_actions, delta_time)
 
     player.handle_mouse(mouse_pos, mouse_rel)
 
@@ -103,5 +121,7 @@ while running:
 
     # 3. Draw the temporary surface onto the main screen
     screen.blit(overlay, (0, 0))
+
+    render_text(f"FPS: {int(clock.get_fps())}", (0, 0), WHITE, screen, size=30)
 
     pygame.display.update()

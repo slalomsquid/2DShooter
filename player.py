@@ -17,20 +17,18 @@ class Player():
         self.health = 100
         self.view_distance = 100
 
-    def handle_keys(self, keys, delta_time):
-        if any(keys[k] for k in keybinds.exit):
-            running = False
-        if any(keys[k] for k in keybinds.up):
+    def handle_held(self, keys, delta_time):
+        if "up" in keys:
             # Multiply by dt to make 10 px / s
             # player.y -= player.speed * delta_time
             self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation, self.speed * delta_time)
-        if any(keys[k] for k in keybinds.down):
+        if "down" in keys:
             # self.y += self.speed * delta_time
             self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 180, self.speed * delta_time)
-        if any(keys[k] for k in keybinds.left):
+        if "left" in keys:
             # self.x -= self.speed * delta_time
             self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation - 90, self.speed * delta_time)
-        if any(keys[k] for k in keybinds.right):
+        if "right" in keys:
             # self.x += self.speed * delta_time
             self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 90, self.speed * delta_time)
 

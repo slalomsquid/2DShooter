@@ -72,13 +72,13 @@ def move_at_angle(vect, angle, velocity):
     # return np.array(vect + displacement, dtype=object)
     return vect + displacement
 
-def get_vector_length(vector):
+def get_vector_magnitude(vector):
     return np.linalg.norm(vector)
 
-def get_vector_distance(vect1, vect2):
+def get_distance_between(vect1, vect2):
     return np.linalg.norm(vect1 - vect2)
 
-def simplify_vector_ratio(vector):
+def simplify_vector(vector):
     if np.linalg.norm(vector) != 0:
         return vector / np.linalg.norm(vector)
     # return np.array([0,0])

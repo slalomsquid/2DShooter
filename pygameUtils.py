@@ -117,3 +117,13 @@ def decimal_range(start, stop, increment):
     while start < stop: # and not math.isclose(start, stop): Py>3.5
         yield start
         start += increment
+
+def lerp(start, end, t):
+    return start + t * (end - start)
+
+def move_towards(current, target, max_distance_delta):
+    to_vector = target - current
+    dist = np.linalg.norm(to_vector)
+    if dist <= max_distance_delta or dist == 0:
+        return target
+    return current + to_vector / dist * max_distance_delta

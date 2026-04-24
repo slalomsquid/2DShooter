@@ -117,11 +117,3 @@ def decimal_range(start, stop, increment):
     while start < stop: # and not math.isclose(start, stop): Py>3.5
         yield start
         start += increment
-
-print(f'forward: {move_at_angle(np.array([0,0]), 0, 1)}')
-print(f'right: {move_at_angle(np.array([0,0]), -90, 1)}')
-print(f'left: {move_at_angle(np.array([0,0]), 90, 1)}')
-print(f'backward: {move_at_angle(np.array([0,0]), 180, 1)}')
-
-print(angle_to_vector(90))
-print(vector_to_angle([0, 2]))

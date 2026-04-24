@@ -1,6 +1,7 @@
 import pygame
 from pygameUtils import *
 import keybinds
+from player import Player
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -21,20 +22,6 @@ class Block():
         self.size_y = size_y
         self.color = color
         self.texture = texture
-
-class Player():
-    def __init__(self, x, y, size_x, size_y, color=(255, 50, 50), texture=None, speed=200):
-        super().__init__()
-        self.x = x
-        self.y = y
-        self.size_x = size_x
-        self.size_y = size_y
-        self.color = color
-        self.texture = texture
-        self.speed = speed
-        self.rotation = 0
-        self.health = 100
-        self.view_distance = 100
 
 blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
 
@@ -79,26 +66,11 @@ while running:
 
     keys = pygame.key.get_pressed()
 
-    if any(keys[k] for k in keybinds.exit):
-        running = False
-    if any(keys[k] for k in keybinds.up):
-        # Multiply by dt to make 10 px / s
-        # player.y -= player.speed * delta_time
-        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation, player.speed * delta_time)
-    if any(keys[k] for k in keybinds.down):
-        # player.y += player.speed * delta_time
-        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation + 180, player.speed * delta_time)
-    if any(keys[k] for k in keybinds.left):
-        # player.x -= player.speed * delta_time
-        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation - 90, player.speed * delta_time)
-    if any(keys[k] for k in keybinds.right):
-        # player.x += player.speed * delta_time
-        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation + 90, player.speed * delta_time)
+    player.handle_keys(keys, delta_time)
 
+    player.handle_mouse(mouse_pos, mouse_rel)
 
     # Frame process logic
-
-    player.rotation = vector_to_angle(np.array(mouse_pos) - np.array([player.x, player.y]))
 
     view_left = player.rotation - 30
     view_right = player.rotation + 30

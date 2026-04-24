@@ -123,11 +123,31 @@ def decimal_range(start, stop, increment):
         start += increment
 
 def lerp(start, end, t):
+    """Linear interpolation between 2 points with t being the proportion between them"""
     return start + t * (end - start)
 
+def lerp_angle(start, end, t):
+    """Linear interpolation between 2 points with t being the proportion between them"""
+    to_dist = (end - start + 180) % 360 - 180
+    if to_dist > 180:
+        to_dist -= 360
+    if to_dist < -180:
+        to_dist += 360
+    return (start + t * to_dist) % 360
+
 def move_towards(current, target, max_distance_delta):
+    """Moves towards a vector/value with a max step"""
     to_vector = target - current
     dist = np.linalg.norm(to_vector)
     if dist <= max_distance_delta or dist == 0:
         return target
     return current + to_vector / dist * max_distance_delta
+
+def move_towards_angle(current : float, target : float, max_distance_delta : float):
+    """Moves towards an angle, allowing to wrap from 360 to prevent going the long way as linear would have it"""
+    to_dist = (target - current + 180) % 360 - 180
+    if to_dist > max_distance_delta:
+        return (current + max_distance_delta) % 360
+    if to_dist < -max_distance_delta:
+        return (current - max_distance_delta) % 360
+    return target

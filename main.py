@@ -86,7 +86,7 @@ while running:
 
     player.handle_held(held_actions, delta_time)
 
-    player.handle_mouse(mouse_pos, mouse_rel)
+    player.handle_mouse(mouse_pos, mouse_rel, delta_time)
 
     # Frame process logic
 
@@ -102,8 +102,6 @@ while running:
 
     for block in blocks:
         pygame.draw.rect(screen, block.color, (block.x, block.y, block.size_x, block.size_y))
-
-    # pygame.draw.polygon(screen, (255, 255, 255, 10), [(player.x + 10, player.y + 10), (player.x + 10 + view_left_direction[0]*player.view_distance, player.y + 10 + view_left_direction[1]*player.view_distance), (player.x + 10 + view_right_direction[0]*player.view_distance, player.y + 10 + view_right_direction[1]*player.view_distance)])
 
     pygame.draw.rect(screen, player.color, (player.x - player.size_x//2, player.y - player.size_y//2, player.size_x, player.size_y))
 

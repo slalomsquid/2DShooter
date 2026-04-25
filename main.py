@@ -2,6 +2,7 @@ import pygame
 from pygameUtils import *
 import keybinds
 from player import Player
+from enemy import Enemy
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -23,103 +24,116 @@ class Block():
         self.color = color
         self.texture = texture
 
-blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
+# Only run if is the ran file, not if imported as a module
+if __name__ == "__main__":
 
-player = Player(ORIGIN[0], ORIGIN[1], 20, 20)
+    blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
 
-mouse_pos = (0, 0)
-mouse_rel = (0, 0)
+    enemies = [Enemy(300, 300, 20, 20)]
 
-running = True
+    player = Player(ORIGIN[0]+20, ORIGIN[1], 20, 20)
 
-while running:
+    mouse_pos = (0, 0)
+    mouse_rel = (0, 0)
 
-    delta_time = clock.tick(FPS) / 1000.0
+    running = True
 
-    # Event handling
+    while running:
 
-    for event in pygame.event.get():
-        match event.type:
-            # Use a switch statment because its more effieient and easier to read than ifs
-            case pygame.QUIT:
-                running = False
-            case pygame.MOUSEMOTION:
-                mouse_pos = event.pos
-                mouse_rel = event.rel
-            # case pygame.KEYDOWN:
-            #     if event.key in keybinds.exit:
-            #         running = False
-            #     elif event.key in keybinds.up:
-            #         # handle up
-            #         player.y -= 10
-            #     elif event.key in keybinds.down:
-            #         # handle down
-            #         player.y += 10
-            #     elif event.key in keybinds.left:
-            #         # handle left
-            #         player.x -= 10
-            #     elif event.key in keybinds.right:
-            #         # handle right
-            #         player.x += 10
-    
-    # Input handling
+        delta_time = clock.tick(FPS) / 1000.0
 
-    keys = pygame.key.get_pressed()
+        # Event handling
 
-    actions = []
+        for event in pygame.event.get():
+            match event.type:
+                # Use a switch statment because its more effieient and easier to read than ifs
+                case pygame.QUIT:
+                    running = False
+                case pygame.MOUSEMOTION:
+                    mouse_pos = event.pos
+                    mouse_rel = event.rel
+                # case pygame.KEYDOWN:
+                #     if event.key in keybinds.exit:
+                #         running = False
+                #     elif event.key in keybinds.up:
+                #         # handle up
+                #         player.y -= 10
+                #     elif event.key in keybinds.down:
+                #         # handle down
+                #         player.y += 10
+                #     elif event.key in keybinds.left:
+                #         # handle left
+                #         player.x -= 10
+                #     elif event.key in keybinds.right:
+                #         # handle right
+                #         player.x += 10
+        
+        # Input handling
 
-    held_actions = []
+        keys = pygame.key.get_pressed()
 
-    if any(keys[k] for k in keybinds.exit):
-        held_actions.append("exit")
-    if any(keys[k] for k in keybinds.up):
-        held_actions.append("up")
-    if any(keys[k] for k in keybinds.down):
-        held_actions.append("down")
-    if any(keys[k] for k in keybinds.left):
-        held_actions.append("left")
-    if any(keys[k] for k in keybinds.right):
-        held_actions.append("right")
+        actions = []
 
-    if "exit" in held_actions:
-        running = False
+        held_actions = []
 
-    player.handle_held(held_actions, delta_time)
+        if any(keys[k] for k in keybinds.exit):
+            held_actions.append("exit")
+        if any(keys[k] for k in keybinds.up):
+            held_actions.append("up")
+        if any(keys[k] for k in keybinds.down):
+            held_actions.append("down")
+        if any(keys[k] for k in keybinds.left):
+            held_actions.append("left")
+        if any(keys[k] for k in keybinds.right):
+            held_actions.append("right")
 
-    player.handle_mouse(mouse_pos, mouse_rel, delta_time)
+        if "exit" in held_actions:
+            running = False
 
-    # Frame process logic
+        old_x, old_y = player.x, player.y
 
-    view_left = player.rotation - 30
-    view_right = player.rotation + 30
+        player.handle_held(held_actions, delta_time)
 
-    view_left_direction = angle_to_vector(view_left)
-    view_right_direction = angle_to_vector(view_right)
+        player.handle_mouse(mouse_pos, mouse_rel, delta_time)
 
-    # Render logic
+        # Move collision from individual classes
+        for block in blocks:
+            if player.x + player.size_x//2 > block.x and player.x - player.size_x//2 < block.x + block.size_x and player.y + player.size_y//2 > block.y and player.y - player.size_y//2 < block.y + block.size_y:
+                player.x, player.y = old_x, old_y
+                break
 
-    screen.fill((0, 0, 0))
+        # Frame process logic
 
-    for block in blocks:
-        pygame.draw.rect(screen, block.color, (block.x, block.y, block.size_x, block.size_y))
+        view_left = player.rotation - 30
+        view_right = player.rotation + 30
 
-    pygame.draw.rect(screen, player.color, (player.x - player.size_x//2, player.y - player.size_y//2, player.size_x, player.size_y))
+        view_left_direction = angle_to_vector(view_left)
+        view_right_direction = angle_to_vector(view_right)
 
-    pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
+        # Render logic
 
-    # Create temporary overlay to allow transparency
-    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+        screen.fill((0, 0, 0))
 
-    points = [
-        (player.x, player.y), 
-        (player.x + view_left_direction[0]*player.view_distance, player.y + view_left_direction[1]*player.view_distance), 
-        (player.x + view_right_direction[0]*player.view_distance, player.y + view_right_direction[1]*player.view_distance)
-    ]
-    pygame.draw.polygon(overlay, (255, 255, 255, 50), points)
+        for block in blocks:
+            pygame.draw.rect(screen, block.color, (block.x, block.y, block.size_x, block.size_y))
 
-    # 3. Draw the temporary surface onto the main screen
-    screen.blit(overlay, (0, 0))
+        pygame.draw.rect(screen, player.color, (player.x - player.size_x//2, player.y - player.size_y//2, player.size_x, player.size_y))
 
-    render_text(f"FPS: {int(clock.get_fps())}", (0, 0), WHITE, screen, size=30)
+        pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
 
-    pygame.display.update()
+        # Create temporary overlay to allow transparency
+        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
+
+        points = [
+            (player.x, player.y), 
+            (player.x + view_left_direction[0]*player.view_distance, player.y + view_left_direction[1]*player.view_distance), 
+            (player.x + view_right_direction[0]*player.view_distance, player.y + view_right_direction[1]*player.view_distance)
+        ]
+        pygame.draw.polygon(overlay, (255, 255, 255, 50), points)
+
+        # 3. Draw the temporary surface onto the main screen
+        screen.blit(overlay, (0, 0))
+
+        render_text(f"FPS: {int(clock.get_fps())}", (0, 0), WHITE, screen, size=30)
+
+        pygame.display.update()

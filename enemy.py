@@ -17,22 +17,10 @@ class Enemy():
         self.health = 100
         self.view_distance = 100
 
-    def handle_held(self, keys, delta_time):
-        if "up" in keys:
-            # Multiply by dt to make 10 px / s
-            # player.y -= player.speed * delta_time
-            self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation, self.speed * delta_time)
-        if "down" in keys:
-            # self.y += self.speed * delta_time
-            self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 180, self.speed * delta_time)
-        if "left" in keys:
-            # self.x -= self.speed * delta_time
-            self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation - 90, self.speed * delta_time)
-        if "right" in keys:
-            # self.x += self.speed * delta_time
-            self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 90, self.speed * delta_time)
-
-    def handle_mouse(self, mouse_pos, mouse_rel, delta_time):
-        self.target_rotation = vector_to_angle(np.array(mouse_pos) - np.array([self.x, self.y]))
+    def process(self, mouse_pos, mouse_rel, player_pos, delta_time):
+        self.target_rotation = vector_to_angle(np.array(player_pos) - np.array([self.x, self.y]))
         self.rotation = move_towards_angle(self.rotation, self.target_rotation, self.max_rotation_speed * delta_time)
         # self.rotation = lerp_angle(self.rotation, self.target_rotation, delta_time*2)
+
+if __name__ == "__main__":
+    print("This is a utility file, not meant to be run directly")

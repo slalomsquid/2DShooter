@@ -3,15 +3,12 @@ from pygameUtils import *
 import keybinds
 from player import Player
 from enemy import Enemy
+import constants
 
 pygame.init()
 clock = pygame.time.Clock()
-FPS = 60
 
-WIDTH, HEIGHT = 500, 400
-ORIGIN = [WIDTH//2, HEIGHT//2]
-
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
 pygame.display.set_caption("Platformer Example")
 
 class Block():
@@ -31,7 +28,7 @@ if __name__ == "__main__":
 
     enemies = [Enemy(300, 300, 20, 20)]
 
-    player = Player(ORIGIN[0]+20, ORIGIN[1], 20, 20)
+    player = Player(constants.ORIGIN[0]+20, constants.ORIGIN[1], 20, 20)
 
     mouse_pos = (0, 0)
     mouse_rel = (0, 0)
@@ -40,7 +37,7 @@ if __name__ == "__main__":
 
     while running:
 
-        delta_time = clock.tick(FPS) / 1000.0
+        delta_time = clock.tick(constants.FPS) / 1000.0
 
         # Pre frame logic
 
@@ -109,13 +106,7 @@ if __name__ == "__main__":
                     player.x, player.y = old_x, old_y
                     break
 
-        view_left = player.rotation - 30
-        view_right = player.rotation + 30
-
-        view_left_direction = angle_to_vector(view_left)
-        view_right_direction = angle_to_vector(view_right)
-
-        player.process(mouse_pos, mouse_rel, delta_time)
+        player_surface = player.process(mouse_pos, mouse_rel, delta_time)
 
         # Render logic
 
@@ -124,23 +115,10 @@ if __name__ == "__main__":
         for block in blocks:
             pygame.draw.rect(screen, block.color, (block.x, block.y, block.size_x, block.size_y))
 
-        pygame.draw.rect(screen, player.color, (player.x - player.size_x//2, player.y - player.size_y//2, player.size_x, player.size_y))
+        screen.blit(player_surface, (0, 0))
 
         pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
 
-        # Create temporary overlay to allow transparency
-        overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-
-        points = [
-            (player.x, player.y), 
-            (player.x + view_left_direction[0]*player.view_distance, player.y + view_left_direction[1]*player.view_distance), 
-            (player.x + view_right_direction[0]*player.view_distance, player.y + view_right_direction[1]*player.view_distance)
-        ]
-        pygame.draw.polygon(overlay, (255, 255, 255, 50), points)
-
-        # 3. Draw the temporary surface onto the main screen
-        screen.blit(overlay, (0, 0))
-
-        render_text(f"FPS: {int(clock.get_fps())}", (0, 0), WHITE, screen, size=30)
+        render_text(f"FPS: {int(clock.get_fps())}", (0, 0), constants.WHITE, screen, size=30)
 
         pygame.display.update()

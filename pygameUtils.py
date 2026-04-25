@@ -1,19 +1,10 @@
 import pygame
 import numpy as np
+import constants
 
 pygame.init()
 
 font = pygame.font.SysFont("Arial", 40)
-
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-CYAN = (0, 255, 255)
-RED = (255, 0, 0)
-CREAM = (238, 222, 197)
-BLUE = (0, 0, 255)
-PURPLE = (255, 0, 255)
-GREEN = (0, 255, 0)
-NONE = (0, 0, 0)
 
 def render_text(text, pos, color, canv, size=1, center=False, transparent=False):
     font_obj = pygame.font.SysFont(None, size) 
@@ -40,7 +31,7 @@ def render_map(map, cell_x, cell_y, canv):
     for cell in range(len(map)):
         for tile in range(len(map[cell])):
             if map[cell][tile] == 1:
-                pygame.draw.rect(canv, CYAN, (tile*cell_x, cell*cell_y, cell_x, cell_y))
+                pygame.draw.rect(canv, constants.CYAN, (tile*cell_x, cell*cell_y, cell_x, cell_y))
 
 def draw_alpha_line(color, alpha, start, end, width, canv):
     # Calculate height of the wall slice
@@ -151,3 +142,6 @@ def move_towards_angle(current : float, target : float, max_distance_delta : flo
     if to_dist < -max_distance_delta:
         return (current - max_distance_delta) % 360
     return target
+
+if __name__ == "__main__":
+    print("This is a utility file, not meant to be run directly")

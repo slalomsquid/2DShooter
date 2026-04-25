@@ -1,5 +1,6 @@
 import keybinds
 from pygameUtils import *
+import constants
 
 class Player():
     def __init__(self, x, y, size_x, size_y, color=(255, 50, 50), texture=None, speed=200):
@@ -48,3 +49,29 @@ class Player():
         self.target_rotation = vector_to_angle(np.array(mouse_pos) - np.array([self.x, self.y]))
         self.rotation = move_towards_angle(self.rotation, self.target_rotation, self.max_rotation_speed * delta_time)
         # self.rotation = lerp_angle(self.rotation, self.target_rotation, delta_time*2)
+
+        view_left = self.rotation - 30
+        view_right = self.rotation + 30
+
+        view_left_direction = angle_to_vector(view_left)
+        view_right_direction = angle_to_vector(view_right)
+
+        # Create temporary overlay to allow transparency
+        surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
+
+        points = [
+            (self.x, self.y), 
+            (self.x + view_left_direction[0]*self.view_distance, self.y + view_left_direction[1]*self.view_distance), 
+            (self.x + view_right_direction[0]*self.view_distance, self.y + view_right_direction[1]*self.view_distance)
+        ]
+        pygame.draw.polygon(surface, (255, 255, 255, 50), points)
+
+        # 3. Draw the temporary surface onto the main screen
+        # surface.blit(surface, (0, 0))
+
+        pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
+
+        return surface
+
+if __name__ == "__main__":
+    print("This is a utility file, not meant to be run directly")

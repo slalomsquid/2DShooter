@@ -22,7 +22,6 @@ class Player():
         self.walk_to_mouse = False
 
     def handle_movement(self, keys, delta_time, rectangles):
-
         dx = 0
         dy = 0
 
@@ -72,7 +71,6 @@ class Player():
             new_rect = self.rect.move(0, dy)
             if not any(obj.colliderect(new_rect) for obj in rectangles.values()):
                 self.rect = new_rect
-        
 
     def handle_mouse(self, mouse_pos, mouse_rel, delta_time):
         pass
@@ -96,7 +94,7 @@ class Player():
 
         pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self))
 
-        #pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
+        draw_rotated_rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y), self.rotation, (self.x, self.y))
 
         return surface
 

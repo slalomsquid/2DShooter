@@ -22,16 +22,18 @@ class Block():
 
 def draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies):
     screen.fill((0, 0, 0))
+
     for block in blocks:
         pygame.draw.rect(screen, block.color, block.rect)
 
-    pygame.draw.rect(screen, "red", player.rect)
     for enemy in enemies:
         pygame.draw.rect(screen, "red", enemy.rect)
-    screen.blit(player_surface, (0, 0))
 
     for enemy_surface in enemy_surfaces:
         screen.blit(enemy_surface, (0, 0))
+
+    # draw player after enemies
+    screen.blit(player_surface, (0, 0))
     
     for bullet in bullets:
         pygame.draw.rect(screen, "white", bullet)

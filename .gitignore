@@ -1,0 +1,7 @@
+/__pycache__
+test.py
+/build
+/dist
+.DS_Store
+/main.dist
+main.spec

@@ -5,3 +5,4 @@ test.py
 .DS_Store
 /main.dist
 main.spec
+.pyc

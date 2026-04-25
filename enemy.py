@@ -23,6 +23,15 @@ class Enemy():
         self.target_rotation = vector_to_angle(np.array(player_pos) - np.array([self.x, self.y]))
         self.rotation = move_towards_angle(self.rotation, self.target_rotation, self.max_rotation_speed * delta_time)
         # self.rotation = lerp_angle(self.rotation, self.target_rotation, delta_time*2)
+    
+    def hit(self, damage):
+        print("Hit")
+        # self.health -= damage
+        # if self.health <= 0:
+        #     # Handle enemy death (e.g., remove from game, play animation, etc.)
+        #     pass
+
+    def draw(self, offset_x, offset_y):
 
         # Create temporary overlay to allow transparency
         surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
@@ -33,9 +42,10 @@ class Enemy():
 
         pygame.draw.polygon(surface, (255, 255, 255, 50), poly)
         
+        draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x, self.y))
+
         return surface
 
-    def draw(self, screen, offset_x, offset_y):
         draw_rect = pygame.Rect(
         self.rect.x - offset_x,
         self.rect.y - offset_y,

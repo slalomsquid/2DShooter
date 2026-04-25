@@ -4,6 +4,7 @@ import keybinds, constants
 from player import Player
 from enemy import Enemy
 from bullet import Bullet
+from block import Block
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -11,48 +12,6 @@ clock = pygame.time.Clock()
 SCREEN = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
 pygame.display.set_caption("Platformer Example")
 
-class Block():
-    def __init__(self, x, y, size_x, size_y, color=(0, 255, 255), texture=None):
-        super().__init__()
-        self.rect = pygame.Rect(x, y, size_x, size_y)
-        self.size_x = size_x
-        self.size_y = size_y
-        self.color = color
-        self.texture = texture
-    
-    def draw(self, offset_x, offset_y):
-        draw_rect = pygame.Rect(
-        self.rect.x - offset_x,
-        self.rect.y - offset_y,
-        self.rect.width,
-        self.rect.height
-    )
-        pygame.draw.rect(SCREEN, self.color, draw_rect)
-    
-
-def draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies, offset_x, offset_y):
-    SCREEN.fill((0, 0, 0))
-    for block in blocks:
-        block.draw(offset_x, offset_y)
-
-    player.draw(SCREEN, offset_x, offset_y)
-
-    for enemy in enemies:
-        enemy.draw(SCREEN, offset_x, offset_y)
-
-    SCREEN.blit(player_surface, (0, 0))
-
-    for enemy_surface in enemy_surfaces:
-        SCREEN.blit(enemy_surface, (0, 0))
-    
-    for bullet in bullets:
-        bullet.draw(offset_x, offset_y, SCREEN)
-
-    pygame.draw.circle(SCREEN, (255, 255, 255), mouse_pos, 5)
-
-    render_text(f"FPS: {int(clock.get_fps())}", (0, 0), constants.WHITE, SCREEN, size=30)
-
-    pygame.display.update()
 
 def main():
     offset_x = 0
@@ -89,7 +48,7 @@ def main():
                     player.handle_mouse(mouse_pos, mouse_rel, delta_time)       
                 case pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        bullet = Bullet(player.x, player.y, player.rotation, 5)
+                        bullet = Bullet(player.rect.centerx, player.rect.centery, player.rotation, 5)
                         bullets.append(bullet)
         
         # Input handling
@@ -101,35 +60,54 @@ def main():
 
         # Frame process logic
 
-        player_surface = player.process(mouse_pos, mouse_rel, delta_time, offset_x, offset_y)
-        enemy_surfaces = []
-        
         for enemy in enemies:
-            tmp_surface = enemy.process((player.x, player.y), delta_time, offset_x, offset_y)
-            if tmp_surface:
-                enemy_surfaces.append(tmp_surface)
-            
-        if ((player.rect.right - offset_x >= constants.WIDTH - scroll_area_width) and player.x_vel > 0 ) or ((player.rect.left - offset_x <= scroll_area_width) and player.x_vel < 0):
-            offset_x += player.x_vel
-        if ((player.rect.top - offset_y >= constants.HEIGHT - scroll_area_width) and player.y_vel > 0 ) or ((player.rect.bottom - offset_y <= scroll_area_width) and player.y_vel < 0):
-            offset_y += player.y_vel
-
+            enemy.process((player.x, player.y), delta_time, offset_x, offset_y) 
         
         rect_map = {obj: obj.rect for obj in (blocks + enemies)}
 
         player.handle_movement(keys, delta_time, rect_map)
         player.sync_player()
 
+        player.process(mouse_pos, mouse_rel, offset_x, offset_y, delta_time=delta_time)
+
+        for bullet in bullets[:]:
+            bullet.process(delta_time)
+            hit_rect = bullet.rect.collidedict(rect_map, 1)
+            if hit_rect:
+                    # hit_rect[1] is the rect, hit_rect[0] is the object
+                    hit_object = hit_rect[0]
+                    hit_method = getattr(hit_object, "hit", None)
+                    if hit_method and callable(hit_method):
+                        hit_method(bullet.velocity)
+                    # Delete on collision
+                    bullets.remove(bullet)
+
         # Render logic
 
-        for bullet in bullets:
-            bullet.update_pos(rect_map, delta_time)
-            if bullet.alive == False:
-                bullets.remove(bullet)
+        SCREEN.fill((0, 0, 0))
 
-        draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies, offset_x, offset_y)
+        surfaces = []
 
+        for block in blocks:
+            if (new_surf := block.draw(offset_x, offset_y)): 
+                surfaces.append(new_surf)
 
+        for enemy in enemies:
+            if (new_surf := enemy.draw(offset_x, offset_y)): 
+                surfaces.append(new_surf)
+
+        if (new_surf := player.draw(offset_x, offset_y)): 
+            surfaces.append(new_surf)
+
+        for bullet in bullets[:]:
+            if (new_surf := bullet.draw(delta_time)): 
+                surfaces.append(new_surf)
+
+        for surface in surfaces:
+            if surface:
+                SCREEN.blit(surface, (0, 0))
+
+        pygame.display.update()
 
 if __name__ == "__main__":
     main()

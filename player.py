@@ -5,8 +5,9 @@ import constants
 class Player():
     def __init__(self, x, y, size_x, size_y, color=(255, 50, 50), texture=None, speed=200):
         super().__init__()
-        self.x = x
-        self.y = y
+        self.rect = pygame.Rect(x, y, size_x, size_y)
+        self.x = self.rect.centerx
+        self.y = self.rect.centery
         self.size_x = size_x
         self.size_y = size_y
         self.color = color
@@ -76,9 +77,13 @@ class Player():
 
         pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self))
 
-        pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
+        #pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
 
         return surface
+
+    def sync_player(self):
+        self.x = self.rect.centerx
+        self.y = self.rect.centery
 
 if __name__ == "__main__":
     print("This is a utility file, not meant to be run directly")

@@ -17,25 +17,40 @@ class Player():
         self.max_rotation_speed = 360
         self.health = 100
         self.view_distance = 100
+        self.fov = 60
+        self.walk_to_mouse = False
 
     def handle_held(self, keys, delta_time):
         changed = False
+        if "shift" in keys:
+            self.walk_to_mouse = True
+        else:
+            self.walk_to_mouse = False
         if "up" in keys:
             # Multiply by dt to make 10 px / s
-            # player.y -= player.speed * delta_time
-            self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation, self.speed * delta_time)
+            if self.walk_to_mouse:
+                self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation, self.speed * delta_time)
+            else:
+                self.y -= self.speed * delta_time
             changed = True
         if "down" in keys:
-            # self.y += self.speed * delta_time
-            self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 180, self.speed * delta_time)
+            if self.walk_to_mouse:
+                self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 180, self.speed * delta_time)
+            else:
+                self.y += self.speed * delta_time
             changed = True
         if "left" in keys:
             # self.x -= self.speed * delta_time
-            self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation - 90, self.speed * delta_time)
+            if self.walk_to_mouse:
+                self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation - 90, self.speed * delta_time)
+            else:
+                self.x -= self.speed * delta_time
             changed = True
         if "right" in keys:
-            # self.x += self.speed * delta_time
-            self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 90, self.speed * delta_time)
+            if self.walk_to_mouse:
+                self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 90, self.speed * delta_time)
+            else:
+                self.x += self.speed * delta_time
             changed = True
         return changed
 
@@ -59,7 +74,7 @@ class Player():
         # Create temporary overlay to allow transparency
         surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
 
-        pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self, 30, 30))
+        pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self))
 
         pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
 

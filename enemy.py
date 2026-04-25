@@ -16,6 +16,7 @@ class Enemy():
         self.max_rotation_speed = 180
         self.health = 100
         self.view_distance = 100
+        self.fov = 60
 
     def process(self, player_pos, delta_time):
         self.target_rotation = vector_to_angle(np.array(player_pos) - np.array([self.x, self.y]))
@@ -25,7 +26,7 @@ class Enemy():
         # Create temporary overlay to allow transparency
         surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
 
-        pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self, 30, 30))
+        pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self))
 
         pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
 

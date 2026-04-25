@@ -26,7 +26,7 @@ if __name__ == "__main__":
 
     blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
 
-    enemies = [Enemy(300, 300, 20, 20)]
+    enemies = [Enemy(constants.ORIGIN[0]+50, constants.ORIGIN[1], 20, 20)]
 
     player = Player(constants.ORIGIN[0]+20, constants.ORIGIN[1], 20, 20)
 
@@ -89,11 +89,12 @@ if __name__ == "__main__":
             held_actions.append("left")
         if any(keys[k] for k in keybinds.right):
             held_actions.append("right")
+        if any(keys[k] for k in keybinds.shift):
+            held_actions.append("shift")
 
         if held_actions:
             if "exit" in held_actions:
                 running = False
-
 
             player_moved = player.handle_held(held_actions, delta_time)
 
@@ -101,15 +102,26 @@ if __name__ == "__main__":
 
         player_surface = player.process(mouse_pos, mouse_rel, delta_time)
 
+        enemy_surfaces = []
+
         for enemy in enemies:
-            enemy.process((player.x, player.y), delta_time)
+            tmp_surface = enemy.process((player.x, player.y), delta_time)
+            if tmp_surface:
+                enemy_surfaces.append(tmp_surface)
 
         # Move collision from individual classes
-        for block in blocks:
-            if player_moved:
+        if player_moved:
+            if player.x < 0 or player.x > constants.WIDTH or player.y < 0 or player.y > constants.HEIGHT:
+                player.x, player.y = old_x, old_y
+            for block in blocks:
                 if player.x + player.size_x//2 > block.x and player.x - player.size_x//2 < block.x + block.size_x and player.y + player.size_y//2 > block.y and player.y - player.size_y//2 < block.y + block.size_y:
                     player.x, player.y = old_x, old_y
                     break
+            for enemy in enemies:
+                if player.x + player.size_x//2 > enemy.x - enemy.size_x//2 and player.x - player.size_x//2 < enemy.x + enemy.size_x//2 and player.y + player.size_y//2 > enemy.y - enemy.size_y//2 and player.y - player.size_y//2 < enemy.y + enemy.size_y//2:
+                    player.x, player.y = old_x, old_y
+                    break
+
 
         # Render logic
 
@@ -119,6 +131,9 @@ if __name__ == "__main__":
             pygame.draw.rect(screen, block.color, (block.x, block.y, block.size_x, block.size_y))
 
         screen.blit(player_surface, (0, 0))
+
+        for enemy_surface in enemy_surfaces:
+            screen.blit(enemy_surface, (0, 0))
 
         pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
 

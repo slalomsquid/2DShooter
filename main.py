@@ -42,6 +42,11 @@ if __name__ == "__main__":
 
         delta_time = clock.tick(FPS) / 1000.0
 
+        # Pre frame logic
+
+        old_x, old_y = player.x, player.y
+        player_moved = False
+
         # Event handling
 
         for event in pygame.event.get():
@@ -52,6 +57,7 @@ if __name__ == "__main__":
                 case pygame.MOUSEMOTION:
                     mouse_pos = event.pos
                     mouse_rel = event.rel
+                    player.handle_mouse(mouse_pos, mouse_rel, delta_time)
                 # case pygame.KEYDOWN:
                 #     if event.key in keybinds.exit:
                 #         running = False
@@ -87,28 +93,29 @@ if __name__ == "__main__":
         if any(keys[k] for k in keybinds.right):
             held_actions.append("right")
 
-        if "exit" in held_actions:
-            running = False
+        if held_actions:
+            if "exit" in held_actions:
+                running = False
 
-        old_x, old_y = player.x, player.y
 
-        player.handle_held(held_actions, delta_time)
+            player_moved = player.handle_held(held_actions, delta_time)
 
-        player.handle_mouse(mouse_pos, mouse_rel, delta_time)
+        # Frame process logic
 
         # Move collision from individual classes
         for block in blocks:
-            if player.x + player.size_x//2 > block.x and player.x - player.size_x//2 < block.x + block.size_x and player.y + player.size_y//2 > block.y and player.y - player.size_y//2 < block.y + block.size_y:
-                player.x, player.y = old_x, old_y
-                break
-
-        # Frame process logic
+            if player_moved:
+                if player.x + player.size_x//2 > block.x and player.x - player.size_x//2 < block.x + block.size_x and player.y + player.size_y//2 > block.y and player.y - player.size_y//2 < block.y + block.size_y:
+                    player.x, player.y = old_x, old_y
+                    break
 
         view_left = player.rotation - 30
         view_right = player.rotation + 30
 
         view_left_direction = angle_to_vector(view_left)
         view_right_direction = angle_to_vector(view_right)
+
+        player.process(mouse_pos, mouse_rel, delta_time)
 
         # Render logic
 

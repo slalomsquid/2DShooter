@@ -7,3 +7,6 @@ test.py
 main.spec
 .pyc
 *.py
+main.spec
+README.md
+requirements.txt

@@ -26,6 +26,14 @@ class Bullet():
                 hit_method = getattr(hit_object, "hit", None)
                 if hit_method and callable(hit_method):
                     hit_method(self.velocity)
+    def draw(self, offset_x, offset_y, screen):
+        draw_rect = pygame.Rect(
+        self.rect.x - offset_x,
+        self.rect.y - offset_y,
+        self.rect.width,
+        self.rect.height
+    )
+        pygame.draw.rect(screen, self.color, draw_rect)
 
 if __name__ == "__main__":
     print("This is a utility file, not meant to be run directly")

@@ -19,7 +19,7 @@ class Enemy():
         self.view_distance = 100
         self.fov = 60
 
-    def process(self, player_pos, delta_time):
+    def process(self, player_pos, delta_time, offset_x, offset_y):
         self.target_rotation = vector_to_angle(np.array(player_pos) - np.array([self.x, self.y]))
         self.rotation = move_towards_angle(self.rotation, self.target_rotation, self.max_rotation_speed * delta_time)
         # self.rotation = lerp_angle(self.rotation, self.target_rotation, delta_time*2)
@@ -27,11 +27,22 @@ class Enemy():
         # Create temporary overlay to allow transparency
         surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
 
-        pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self))
+        poly = create_view_cone_polygon(self)
 
-        pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
+        poly = [(px - offset_x, py - offset_y) for (px, py) in poly]
 
+        pygame.draw.polygon(surface, (255, 255, 255, 50), poly)
+        
         return surface
+
+    def draw(self, screen, offset_x, offset_y):
+        draw_rect = pygame.Rect(
+        self.rect.x - offset_x,
+        self.rect.y - offset_y,
+        self.rect.width,
+        self.rect.height
+    )
+        pygame.draw.rect(screen, self.color, draw_rect)
 
 if __name__ == "__main__":
     print("This is a utility file, not meant to be run directly")

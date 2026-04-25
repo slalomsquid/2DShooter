@@ -22,7 +22,6 @@ class Player():
         self.walk_to_mouse = False
 
     def handle_movement(self, keys, delta_time, rectangles):
-
         dx = 0
         dy = 0
 
@@ -66,21 +65,22 @@ class Player():
             new_rect = self.rect.move(dx, 0)
             if not any(obj.colliderect(new_rect) for obj in rectangles.values()):
                 self.rect = new_rect
+                self.x_vel = dx
 
         # Try Y movement
         if dy != 0:
             new_rect = self.rect.move(0, dy)
             if not any(obj.colliderect(new_rect) for obj in rectangles.values()):
                 self.rect = new_rect
+                self.y_vel = dy   
         
-
     def handle_mouse(self, mouse_pos, mouse_rel, delta_time):
         pass
         # self.target_rotation = vector_to_angle(np.array(mouse_pos) - np.array([self.x, self.y]))
         # self.rotation = move_towards_angle(self.rotation, self.target_rotation, self.max_rotation_speed * delta_time)
         # # self.rotation = lerp_angle(self.rotation, self.target_rotation, delta_time*2)
 
-    def process(self, mouse_pos, mouse_rel, delta_time):
+    def process(self, mouse_pos, mouse_rel, delta_time, offset_x, offset_y):
         self.target_rotation = vector_to_angle(np.array(mouse_pos) - np.array([self.x, self.y]))
         self.rotation = move_towards_angle(self.rotation, self.target_rotation, self.max_rotation_speed * delta_time)
         # self.rotation = lerp_angle(self.rotation, self.target_rotation, delta_time*2)
@@ -93,13 +93,26 @@ class Player():
 
         # Create temporary overlay to allow transparency
         surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
+        
+        poly = create_view_cone_polygon(self)
 
-        pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self))
+        poly = [(px - offset_x, py - offset_y) for (px, py) in poly]
+
+        pygame.draw.polygon(surface, (255, 255, 255, 50), poly)
 
         #pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
 
         return surface
-
+    
+    def draw(self, screen, offset_x, offset_y):
+        draw_rect = pygame.Rect(
+        self.rect.x - offset_x,
+        self.rect.y - offset_y,
+        self.rect.width,
+        self.rect.height
+    )
+        pygame.draw.rect(screen, self.color, draw_rect)
+    
     def sync_player(self):
         self.x = self.rect.centerx
         self.y = self.rect.centery

@@ -2,7 +2,7 @@
 import pygame
 
 FPS = 60
-WIDTH, HEIGHT = 500, 400
+WIDTH, HEIGHT = 1000, 800
 ORIGIN = [WIDTH//2, HEIGHT//2]
 
 BLACK = (0, 0, 0)

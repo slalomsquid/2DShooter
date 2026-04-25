@@ -48,9 +48,9 @@ def draw_alpha_line(color, alpha, start, end, width, canv):
     # Blit it to the main canvas at the start position
     canv.blit(line_surf, start)
 
-def create_view_cone_polygon(self, left_angle_offset=30, right_angle_offset=30):
-    view_left = self.rotation - left_angle_offset
-    view_right = self.rotation + right_angle_offset
+def create_view_cone_polygon(self):
+    view_left = self.rotation - self.fov/2
+    view_right = self.rotation + self.fov/2
 
     view_left_direction = angle_to_vector(view_left)
     view_right_direction = angle_to_vector(view_right)

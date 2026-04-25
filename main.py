@@ -27,8 +27,6 @@ def main():
     mouse_pos = (0, 0)
     mouse_rel = (0, 0)
 
-    scroll_area_width = 200
-
     running = True
 
     while running:
@@ -65,7 +63,18 @@ def main():
         
         rect_map = {obj: obj.rect for obj in (blocks + enemies)}
 
-        player.handle_movement(keys, delta_time, rect_map)
+        dx, dy = player.handle_movement(keys, delta_time, rect_map)
+
+        if player.x + dx < constants.SCROLL_MARGIN:
+            offset_x += dx
+        elif player.x + dx > constants.WIDTH - constants.SCROLL_MARGIN:
+            offset_x += dx
+
+        if player.y + dy < constants.SCROLL_MARGIN:
+            offset_y += dy
+        elif player.y + dy > constants.HEIGHT - constants.SCROLL_MARGIN:
+            offset_y += dy
+
         player.sync_player()
 
         player.process(mouse_pos, mouse_rel, offset_x, offset_y, delta_time=delta_time)

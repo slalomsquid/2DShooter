@@ -16,3 +16,4 @@ Avoid Captive User Interfaces: Programs should not restrict user input or force 
 TODO:
 DONE: Add check if held pygame, track press & release of keys, maybe with classes?
 Refine / standardise collision system, maybe add vector function for checking overlap, < or > linear quation
+All collisions handled in main script

@@ -65,15 +65,21 @@ class Player():
         if dx != 0:
             new_rect = self.rect.move(dx, 0)
             if not any(obj.colliderect(new_rect) for obj in rectangles.values()):
-                self.rect = new_rect
-                self.x_vel = dx
+                self.x += dx
+                # self.rect = new_rect
+                # self.x_vel = dx
 
         # Try Y movement
         if dy != 0:
             new_rect = self.rect.move(0, dy)
             if not any(obj.colliderect(new_rect) for obj in rectangles.values()):
-                self.rect = new_rect
-                self.y_vel = dy   
+                self.y += dy
+                # self.rect = new_rect
+                # self.y_vel = dy  
+
+        self.rect.center = (self.x, self.y)
+
+        return dx, dy 
         
     def handle_mouse(self, mouse_pos, mouse_rel, delta_time):
         pass
@@ -104,13 +110,21 @@ class Player():
 
         pygame.draw.polygon(surface, (255, 255, 255, 50), poly)
 
-        draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x, self.y))
+        # draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x, self.y))
+
+        draw_rotated_rect(surface, self.color,
+    (self.x - self.size_x//2 - offset_x,
+     self.y - self.size_y//2 - offset_y,
+     self.size_x, self.size_y),
+    self.rotation,
+    (self.x - offset_x, self.y - offset_y))
 
         return surface
     
     def sync_player(self):
-        self.x = self.rect.centerx
-        self.y = self.rect.centery
+        # self.x = self.rect.centerx
+        # self.y = self.rect.centery
+        self.rect.center = (self.x, self.y)
 
 if __name__ == "__main__":
     print("This is a utility file, not meant to be run directly")

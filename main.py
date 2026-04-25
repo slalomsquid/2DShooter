@@ -20,9 +20,11 @@ class Block():
         self.color = color
         self.texture = texture
 
-def bullet_movement(bullets):
+def bullet_movement(bullets, rectangles):
     for bullet in bullets[:]:
         bullet.x += 5
+        if bullet.x > constants.WIDTH or any(bullet.colliderect(obj) for obj in rectangles):
+            bullets.remove(bullet)
 
 def handle_movement(player, rectangles, keys):
     dx = 0
@@ -136,7 +138,7 @@ def main():
         # Render logic
         handle_movement(player, rectangles, keys)
         player.sync_player()
-        bullet_movement(bullets)
+        bullet_movement(bullets, rectangles)
         draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies)
 
 

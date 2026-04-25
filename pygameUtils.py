@@ -62,6 +62,22 @@ def create_view_cone_polygon(self):
     ]
     return points
 
+def draw_rotated_rect(screen, color, rect_dims, angle, center_pos):
+    # Create a surface with an alpha
+    temp_surf = pygame.Surface((rect_dims[2], rect_dims[3]), pygame.SRCALPHA)
+    
+    # Draw rectangle on the surface
+    pygame.draw.rect(temp_surf, color, (0, 0, rect_dims[2], rect_dims[3]))
+    
+    # Rotate the surface with -angle because pygame goes anticlockwise
+    rotated_surf = pygame.transform.rotate(temp_surf, -angle)
+    
+    # Get the new rect and center it at the desired position
+    rotated_rect = rotated_surf.get_rect(center=center_pos)
+    
+    # Draw it to the main screen
+    screen.blit(rotated_surf, rotated_rect)
+
 ### VECTOR MATH ###
 
 def angle_to_vector(angle):

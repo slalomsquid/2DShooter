@@ -14,4 +14,5 @@ Portability over Efficiency: Prioritize making software run on different machine
 Avoid Captive User Interfaces: Programs should not restrict user input or force a specific, interactive flow, allow command arguments or alternative inputs.
 
 TODO:
-Add check if held pygame, track press & release of keys, maybe with classes?
+DONE: Add check if held pygame, track press & release of keys, maybe with classes?
+Refine / standardise collision system, maybe add vector function for checking overlap, < or > linear quation

@@ -36,6 +36,9 @@ class Player():
         self.health = 100
         self.view_distance = 100
 
+def shooting():
+    x = 0
+
 blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
 
 player = Player(ORIGIN[0], ORIGIN[1], 20, 20)
@@ -59,6 +62,10 @@ while running:
             case pygame.MOUSEMOTION:
                 mouse_pos = event.pos
                 mouse_rel = event.rel
+            
+            case pygame.KEYDOWN:
+                if pygame.KEYDOWN == pygame.K_SPACE:
+                    shooting()
             # case pygame.KEYDOWN:
             #     if event.key in keybinds.exit:
             #         running = False

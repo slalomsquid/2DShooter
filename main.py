@@ -99,14 +99,17 @@ if __name__ == "__main__":
 
         # Frame process logic
 
+        player_surface = player.process(mouse_pos, mouse_rel, delta_time)
+
+        for enemy in enemies:
+            enemy.process((player.x, player.y), delta_time)
+
         # Move collision from individual classes
         for block in blocks:
             if player_moved:
                 if player.x + player.size_x//2 > block.x and player.x - player.size_x//2 < block.x + block.size_x and player.y + player.size_y//2 > block.y and player.y - player.size_y//2 < block.y + block.size_y:
                     player.x, player.y = old_x, old_y
                     break
-
-        player_surface = player.process(mouse_pos, mouse_rel, delta_time)
 
         # Render logic
 

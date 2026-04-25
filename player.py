@@ -14,7 +14,7 @@ class Player():
         self.speed = speed
         self.rotation = 0
         self.target_rotation = 0
-        self.max_rotation_speed = 180
+        self.max_rotation_speed = 360
         self.health = 100
         self.view_distance = 100
 
@@ -59,15 +59,7 @@ class Player():
         # Create temporary overlay to allow transparency
         surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
 
-        points = [
-            (self.x, self.y), 
-            (self.x + view_left_direction[0]*self.view_distance, self.y + view_left_direction[1]*self.view_distance), 
-            (self.x + view_right_direction[0]*self.view_distance, self.y + view_right_direction[1]*self.view_distance)
-        ]
-        pygame.draw.polygon(surface, (255, 255, 255, 50), points)
-
-        # 3. Draw the temporary surface onto the main screen
-        # surface.blit(surface, (0, 0))
+        pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self, 30, 30))
 
         pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
 

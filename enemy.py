@@ -17,10 +17,19 @@ class Enemy():
         self.health = 100
         self.view_distance = 100
 
-    def process(self, mouse_pos, mouse_rel, player_pos, delta_time):
+    def process(self, player_pos, delta_time):
         self.target_rotation = vector_to_angle(np.array(player_pos) - np.array([self.x, self.y]))
         self.rotation = move_towards_angle(self.rotation, self.target_rotation, self.max_rotation_speed * delta_time)
         # self.rotation = lerp_angle(self.rotation, self.target_rotation, delta_time*2)
+
+        # Create temporary overlay to allow transparency
+        surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
+
+        pygame.draw.polygon(surface, (255, 255, 255, 50), create_view_cone_polygon(self, 30, 30))
+
+        pygame.draw.rect(surface, self.color, (self.x - self.size_x//2, self.y - self.size_y//2, self.size_x, self.size_y))
+
+        return surface
 
 if __name__ == "__main__":
     print("This is a utility file, not meant to be run directly")

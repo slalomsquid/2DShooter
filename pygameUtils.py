@@ -1,26 +1,21 @@
 import pygame
 import numpy as np
+import constants
 
 pygame.init()
 
 font = pygame.font.SysFont("Arial", 40)
 
-BLACK = (0, 0, 0)
-WHITE = (255, 255, 255)
-CYAN = (0, 255, 255)
-RED = (255, 0, 0)
-CREAM = (238, 222, 197)
-BLUE = (0, 0, 255)
-PURPLE = (255, 0, 255)
-GREEN = (0, 255, 0)
-NONE = (0, 0, 0)
-
-def render_text(text, pos, canv):
-    # text_surface = pygame.surface(pygame.SRCALPHA)
-    text_surface = font.render(str(text), False, BLACK)
-    # text_surface = text_surface.convert_alpha()
+def render_text(text, pos, color, canv, size=1, center=False, transparent=False):
+    font_obj = pygame.font.SysFont(None, size) 
+    if transparent:
+        text_surface = pygame.surface(pygame.SRCALPHA)
+        text_surface = text_surface.convert_alpha()
+    else:
+        text_surface = font_obj.render(str(text), False, color)
     text_rect = text_surface.get_rect()
-    text_rect.center = (pos[0], pos[1])
+    if center:
+        text_rect.center = (pos[0], pos[1])
     canv.blit(text_surface, text_rect)
 
 def render_player_arrow(pos, ang, color, canv):
@@ -36,7 +31,7 @@ def render_map(map, cell_x, cell_y, canv):
     for cell in range(len(map)):
         for tile in range(len(map[cell])):
             if map[cell][tile] == 1:
-                pygame.draw.rect(canv, CYAN, (tile*cell_x, cell*cell_y, cell_x, cell_y))
+                pygame.draw.rect(canv, constants.CYAN, (tile*cell_x, cell*cell_y, cell_x, cell_y))
 
 def draw_alpha_line(color, alpha, start, end, width, canv):
     # Calculate height of the wall slice
@@ -53,7 +48,21 @@ def draw_alpha_line(color, alpha, start, end, width, canv):
     # Blit it to the main canvas at the start position
     canv.blit(line_surf, start)
 
-# VECTOR MATH #
+def create_view_cone_polygon(self):
+    view_left = self.rotation - self.fov/2
+    view_right = self.rotation + self.fov/2
+
+    view_left_direction = angle_to_vector(view_left)
+    view_right_direction = angle_to_vector(view_right)
+
+    points = [
+        (self.x, self.y), 
+        (self.x + view_left_direction[0]*self.view_distance, self.y + view_left_direction[1]*self.view_distance), 
+        (self.x + view_right_direction[0]*self.view_distance, self.y + view_right_direction[1]*self.view_distance)
+    ]
+    return points
+
+### VECTOR MATH ###
 
 def angle_to_vector(angle):
     """Returns a vector with a length of 1 for a given angle, <angle -> left, >angl -> right"""
@@ -117,3 +126,36 @@ def decimal_range(start, stop, increment):
     while start < stop: # and not math.isclose(start, stop): Py>3.5
         yield start
         start += increment
+
+def lerp(start, end, t):
+    """Linear interpolation between 2 points with t being the proportion between them"""
+    return start + t * (end - start)
+
+def lerp_angle(start, end, t):
+    """Linear interpolation between 2 points with t being the proportion between them"""
+    to_dist = (end - start + 180) % 360 - 180
+    if to_dist > 180:
+        to_dist -= 360
+    if to_dist < -180:
+        to_dist += 360
+    return (start + t * to_dist) % 360
+
+def move_towards(current, target, max_distance_delta):
+    """Moves towards a vector/value with a max step"""
+    to_vector = target - current
+    dist = np.linalg.norm(to_vector)
+    if dist <= max_distance_delta or dist == 0:
+        return target
+    return current + to_vector / dist * max_distance_delta
+
+def move_towards_angle(current : float, target : float, max_distance_delta : float):
+    """Moves towards an angle, allowing to wrap from 360 to prevent going the long way as linear would have it"""
+    to_dist = (target - current + 180) % 360 - 180
+    if to_dist > max_distance_delta:
+        return (current + max_distance_delta) % 360
+    if to_dist < -max_distance_delta:
+        return (current - max_distance_delta) % 360
+    return target
+
+if __name__ == "__main__":
+    print("This is a utility file, not meant to be run directly")

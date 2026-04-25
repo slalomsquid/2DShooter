@@ -1,15 +1,14 @@
 import pygame
 from pygameUtils import *
 import keybinds
+from player import Player
+from enemy import Enemy
+import constants
 
 pygame.init()
 clock = pygame.time.Clock()
-FPS = 60
 
-WIDTH, HEIGHT = 500, 400
-ORIGIN = [WIDTH//2, HEIGHT//2]
-
-screen = pygame.display.set_mode((WIDTH, HEIGHT))
+screen = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
 pygame.display.set_caption("Platformer Example")
 
 class Block():
@@ -22,121 +21,117 @@ class Block():
         self.color = color
         self.texture = texture
 
-class Player():
-    def __init__(self, x, y, size_x, size_y, color=(255, 50, 50), texture=None, speed=200):
-        super().__init__()
-        self.x = x
-        self.y = y
-        self.size_x = size_x
-        self.size_y = size_y
-        self.color = color
-        self.texture = texture
-        self.speed = speed
-        self.rotation = 0
-        self.health = 100
-        self.view_distance = 100
+# Only run if is the ran file, not if imported as a module
+if __name__ == "__main__":
 
-def shooting():
-    x = 0
+    def shooting():
+        x = 0
 
-blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
+    blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
 
-player = Player(ORIGIN[0], ORIGIN[1], 20, 20)
 
-mouse_pos = (0, 0)
-mouse_rel = (0, 0)
+    enemies = [Enemy(constants.ORIGIN[0]+50, constants.ORIGIN[1], 20, 20)]
 
-running = True
+    player = Player(constants.ORIGIN[0]+20, constants.ORIGIN[1], 20, 20)
 
-while running:
+    mouse_pos = (0, 0)
+    mouse_rel = (0, 0)
 
-    delta_time = clock.tick(FPS) / 1000.0
+    running = True
 
-    # Event handling
+    while running:
 
-    for event in pygame.event.get():
-        match event.type:
-            # Use a switch statment because its more effieient and easier to read than ifs
-            case pygame.QUIT:
+        delta_time = clock.tick(constants.FPS) / 1000.0
+
+        # Pre frame logic
+
+        old_x, old_y = player.x, player.y
+        player_moved = False
+
+        # Event handling
+
+        for event in pygame.event.get():
+            match event.type:
+                # Use a switch statment because its more effieient and easier to read than ifs
+                case pygame.QUIT:
+                    running = False
+                case pygame.MOUSEMOTION:
+                    mouse_pos = event.pos
+                    mouse_rel = event.rel
+                    player.handle_mouse(mouse_pos, mouse_rel, delta_time)       
+                case pygame.KEYDOWN:
+                    if pygame.KEYDOWN == pygame.K_SPACE:
+                        shooting()
+        
+        # Input handling
+
+        keys = pygame.key.get_pressed()
+
+        actions = []
+
+        held_actions = []
+
+        if any(keys[k] for k in keybinds.exit):
+            held_actions.append("exit")
+        if any(keys[k] for k in keybinds.up):
+            held_actions.append("up")
+        if any(keys[k] for k in keybinds.down):
+            held_actions.append("down")
+        if any(keys[k] for k in keybinds.left):
+            held_actions.append("left")
+        if any(keys[k] for k in keybinds.right):
+            held_actions.append("right")
+        if any(keys[k] for k in keybinds.shift):
+            held_actions.append("shift")
+
+        if held_actions:
+            if "exit" in held_actions:
                 running = False
-            case pygame.MOUSEMOTION:
-                mouse_pos = event.pos
-                mouse_rel = event.rel
-            
-            case pygame.KEYDOWN:
-                if pygame.KEYDOWN == pygame.K_SPACE:
-                    shooting()
-            # case pygame.KEYDOWN:
-            #     if event.key in keybinds.exit:
-            #         running = False
-            #     elif event.key in keybinds.up:
-            #         # handle up
-            #         player.y -= 10
-            #     elif event.key in keybinds.down:
-            #         # handle down
-            #         player.y += 10
-            #     elif event.key in keybinds.left:
-            #         # handle left
-            #         player.x -= 10
-            #     elif event.key in keybinds.right:
-            #         # handle right
-            #         player.x += 10
-    
+
+
+
     # Input handling
+        player_moved = player.handle_held(held_actions, delta_time)
 
-    keys = pygame.key.get_pressed()
+        # Frame process logic
 
-    if any(keys[k] for k in keybinds.exit):
-        running = False
-    if any(keys[k] for k in keybinds.up):
-        # Multiply by dt to make 10 px / s
-        # player.y -= player.speed * delta_time
-        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation, player.speed * delta_time)
-    if any(keys[k] for k in keybinds.down):
-        # player.y += player.speed * delta_time
-        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation + 180, player.speed * delta_time)
-    if any(keys[k] for k in keybinds.left):
-        # player.x -= player.speed * delta_time
-        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation - 90, player.speed * delta_time)
-    if any(keys[k] for k in keybinds.right):
-        # player.x += player.speed * delta_time
-        player.x, player.y = move_at_angle(np.array([player.x, player.y]), player.rotation + 90, player.speed * delta_time)
+        player_surface = player.process(mouse_pos, mouse_rel, delta_time)
+
+        enemy_surfaces = []
+
+        for enemy in enemies:
+            tmp_surface = enemy.process((player.x, player.y), delta_time)
+            if tmp_surface:
+                enemy_surfaces.append(tmp_surface)
+
+        # Move collision from individual classes
+        if player_moved:
+            if player.x < 0 or player.x > constants.WIDTH or player.y < 0 or player.y > constants.HEIGHT:
+                player.x, player.y = old_x, old_y
+            for block in blocks:
+                if player.x + player.size_x//2 > block.x and player.x - player.size_x//2 < block.x + block.size_x and player.y + player.size_y//2 > block.y and player.y - player.size_y//2 < block.y + block.size_y:
+                    player.x, player.y = old_x, old_y
+                    break
+            for enemy in enemies:
+                if player.x + player.size_x//2 > enemy.x - enemy.size_x//2 and player.x - player.size_x//2 < enemy.x + enemy.size_x//2 and player.y + player.size_y//2 > enemy.y - enemy.size_y//2 and player.y - player.size_y//2 < enemy.y + enemy.size_y//2:
+                    player.x, player.y = old_x, old_y
+                    break
 
 
-    # Frame process logic
+        # Render logic
 
-    player.rotation = vector_to_angle(np.array(mouse_pos) - np.array([player.x, player.y]))
+        screen.fill((0, 0, 0))
 
-    view_left = player.rotation - 30
-    view_right = player.rotation + 30
+        for block in blocks:
+            pygame.draw.rect(screen, block.color, (block.x, block.y, block.size_x, block.size_y))
 
-    view_left_direction = angle_to_vector(view_left)
-    view_right_direction = angle_to_vector(view_right)
+        screen.blit(player_surface, (0, 0))
 
-    # Render logic
+        for enemy_surface in enemy_surfaces:
+            screen.blit(enemy_surface, (0, 0))
 
-    screen.fill((0, 0, 0))
+        pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
 
-    for block in blocks:
-        pygame.draw.rect(screen, block.color, (block.x, block.y, block.size_x, block.size_y))
+        render_text(f"FPS: {int(clock.get_fps())}", (0, 0), constants.WHITE, screen, size=30)
 
-    # pygame.draw.polygon(screen, (255, 255, 255, 10), [(player.x + 10, player.y + 10), (player.x + 10 + view_left_direction[0]*player.view_distance, player.y + 10 + view_left_direction[1]*player.view_distance), (player.x + 10 + view_right_direction[0]*player.view_distance, player.y + 10 + view_right_direction[1]*player.view_distance)])
-
-    pygame.draw.rect(screen, player.color, (player.x - player.size_x//2, player.y - player.size_y//2, player.size_x, player.size_y))
-
-    pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
-
-    # Create temporary overlay to allow transparency
-    overlay = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
-
-    points = [
-        (player.x, player.y), 
-        (player.x + view_left_direction[0]*player.view_distance, player.y + view_left_direction[1]*player.view_distance), 
-        (player.x + view_right_direction[0]*player.view_distance, player.y + view_right_direction[1]*player.view_distance)
-    ]
-    pygame.draw.polygon(overlay, (255, 255, 255, 50), points)
-
-    # 3. Draw the temporary surface onto the main screen
-    screen.blit(overlay, (0, 0))
-
-    pygame.display.update()
+        pygame.display.update()

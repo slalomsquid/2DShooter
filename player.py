@@ -21,39 +21,58 @@ class Player():
         self.fov = 60
         self.walk_to_mouse = False
 
-    def handle_held(self, keys, delta_time):
-        changed = False
-        if "shift" in keys:
+    def handle_movement(self, keys, delta_time, rectangles):
+
+        dx = 0
+        dy = 0
+
+        speed = self.speed * delta_time
+
+        forward = angle_to_vector(self.rotation)
+        strafe = angle_to_vector(self.rotation - 90)
+
+        if keys [pygame.K_LSHIFT]:
             self.walk_to_mouse = True
         else:
             self.walk_to_mouse = False
-        if "up" in keys:
-            # Multiply by dt to make 10 px / s
+
+        if any(keys[k] for k in keybinds.up):
             if self.walk_to_mouse:
-                self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation, self.speed * delta_time)
+                dx += forward[0] * speed
+                dy += forward[1] * speed
             else:
-                self.y -= self.speed * delta_time
-            changed = True
-        if "down" in keys:
+                dy -= speed
+        if any(keys[k] for k in keybinds.down):
             if self.walk_to_mouse:
-                self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 180, self.speed * delta_time)
+                dx -= forward[0] * speed
+                dy -= forward[1] * speed
             else:
-                self.y += self.speed * delta_time
-            changed = True
-        if "left" in keys:
-            # self.x -= self.speed * delta_time
+                dy += speed
+        if any(keys[k] for k in keybinds.left):
             if self.walk_to_mouse:
-                self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation - 90, self.speed * delta_time)
+                dx += strafe[0] * speed
+                dy += strafe[1] * speed
             else:
-                self.x -= self.speed * delta_time
-            changed = True
-        if "right" in keys:
+                dx -= speed
+        if any(keys[k] for k in keybinds.right):
             if self.walk_to_mouse:
-                self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation + 90, self.speed * delta_time)
+                dx += strafe[0] * speed
+                dy += strafe[1] * speed
             else:
-                self.x += self.speed * delta_time
-            changed = True
-        return changed
+                dx += speed
+
+        # Try X movement
+        if dx != 0:
+            new_rect = self.rect.move(dx, 0)
+            if not any(obj.colliderect(new_rect) for obj in rectangles):
+                self.rect = new_rect
+
+        # Try Y movement
+        if dy != 0:
+            new_rect = self.rect.move(0, dy)
+            if not any(obj.colliderect(new_rect) for obj in rectangles):
+                self.rect = new_rect
+        
 
     def handle_mouse(self, mouse_pos, mouse_rel, delta_time):
         pass
@@ -69,8 +88,8 @@ class Player():
         view_left = self.rotation - 30
         view_right = self.rotation + 30
 
-        view_left_direction = angle_to_vector(view_left)
-        view_right_direction = angle_to_vector(view_right)
+        view_left_strafe = angle_to_vector(view_left)
+        view_right_strafe = angle_to_vector(view_right)
 
         # Create temporary overlay to allow transparency
         surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)

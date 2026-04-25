@@ -22,34 +22,10 @@ class Block():
 
 def bullet_movement(bullets, rectangles):
     for bullet in bullets[:]:
-        bullet.x += 5
+        bullet.x += constants.BULLET_VEL
         if bullet.x > constants.WIDTH or any(bullet.colliderect(obj) for obj in rectangles):
             bullets.remove(bullet)
 
-def handle_movement(player, rectangles, keys):
-    dx = 0
-    dy = 0
-
-    if any(keys[k] for k in keybinds.up):
-        dy -= 5
-    if any(keys[k] for k in keybinds.down):
-        dy += 5
-    if any(keys[k] for k in keybinds.left):
-        dx -= 5
-    if any(keys[k] for k in keybinds.right):
-        dx += 5
-
-    # Try X movement
-    if dx != 0:
-        new_rect = player.rect.move(dx, 0)
-        if not any(obj.colliderect(new_rect) for obj in rectangles):
-            player.rect = new_rect
-
-    # Try Y movement
-    if dy != 0:
-        new_rect = player.rect.move(0, dy)
-        if not any(obj.colliderect(new_rect) for obj in rectangles):
-            player.rect = new_rect
 
 def draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies):
     screen.fill((0, 0, 0))
@@ -107,27 +83,22 @@ def main():
                     player.handle_mouse(mouse_pos, mouse_rel, delta_time)       
                 case pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        bullet = pygame.Rect(player.x, player.y, 10, 5)
+                        bullet = pygame.cicl(player.x, player.y, 10, 5)
                         bullets.append(bullet)
         
         # Input handling
-        held_actions = []
 
-        if held_actions:
-            if "exit" in held_actions:
-                running = False
+
         keys = pygame.key.get_pressed()
         if any(keys[k] for k in keybinds.exit):
-            held_actions.append("exit")
-        if any(keys[k] for k in keybinds.shift):
-            held_actions.append("shift")
+            pygame.quit()
+            running = False
 
         # Frame process logic
 
         player_surface = player.process(mouse_pos, mouse_rel, delta_time)
-
         enemy_surfaces = []
-
+        
         for enemy in enemies:
             tmp_surface = enemy.process((player.x, player.y), delta_time)
             if tmp_surface:
@@ -136,7 +107,7 @@ def main():
         rectangles = [block.rect for block in blocks] + [enemy.rect for enemy in enemies]
 
         # Render logic
-        handle_movement(player, rectangles, keys)
+        player.handle_movement(keys, delta_time, rectangles)
         player.sync_player()
         bullet_movement(bullets, rectangles)
         draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies)

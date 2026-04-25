@@ -52,8 +52,6 @@ def main():
 
     bullets = []
 
-    rectangles = []
-
     mouse_pos = (0, 0)
     mouse_rel = (0, 0)
 

@@ -64,13 +64,13 @@ class Player():
         # Try X movement
         if dx != 0:
             new_rect = self.rect.move(dx, 0)
-            if not any(obj.colliderect(new_rect) for obj in rectangles):
+            if not any(obj.colliderect(new_rect) for obj in rectangles.values()):
                 self.rect = new_rect
 
         # Try Y movement
         if dy != 0:
             new_rect = self.rect.move(0, dy)
-            if not any(obj.colliderect(new_rect) for obj in rectangles):
+            if not any(obj.colliderect(new_rect) for obj in rectangles.values()):
                 self.rect = new_rect
         
 

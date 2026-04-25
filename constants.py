@@ -15,7 +15,5 @@ PURPLE = (255, 0, 255)
 GREEN = (0, 255, 0)
 NONE = (0, 0, 0)
 
-BULLET_VEL = 5
-
 if __name__ == "__main__":
     print("This is a utility file, not meant to be run directly")

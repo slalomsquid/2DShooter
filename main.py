@@ -1,9 +1,9 @@
 import pygame
 from pygameUtils import *
-import keybinds
+import keybinds, constants
 from player import Player
 from enemy import Enemy
-import constants
+from bullet import Bullet
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -19,13 +19,6 @@ class Block():
         self.size_y = size_y
         self.color = color
         self.texture = texture
-
-def bullet_movement(bullets, rectangles):
-    for bullet in bullets[:]:
-        bullet.x += constants.BULLET_VEL
-        if bullet.x > constants.WIDTH or any(bullet.colliderect(obj) for obj in rectangles):
-            bullets.remove(bullet)
-
 
 def draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies):
     screen.fill((0, 0, 0))
@@ -83,11 +76,10 @@ def main():
                     player.handle_mouse(mouse_pos, mouse_rel, delta_time)       
                 case pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE:
-                        bullet = pygame.cicl(player.x, player.y, 10, 5)
+                        bullet = Bullet(player.x, player.y, player.rotation, 5)
                         bullets.append(bullet)
         
         # Input handling
-
 
         keys = pygame.key.get_pressed()
         if any(keys[k] for k in keybinds.exit):
@@ -104,15 +96,20 @@ def main():
             if tmp_surface:
                 enemy_surfaces.append(tmp_surface)
         
-        rectangles = [block.rect for block in blocks] + [enemy.rect for enemy in enemies]
+        rect_map = {obj: obj.rect for obj in (blocks + enemies)}
+
+        player.handle_movement(keys, delta_time, rect_map)
+        player.sync_player()
 
         # Render logic
-        player.handle_movement(keys, delta_time, rectangles)
-        player.sync_player()
-        bullet_movement(bullets, rectangles)
+
+        for bullet in bullets:
+            bullet.update_pos(rect_map, delta_time)
+            if bullet.alive == False:
+                bullets.remove(bullet)
+
         draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies)
 
 
 if __name__ == "__main__":
     main()
-

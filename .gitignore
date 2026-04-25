@@ -5,3 +5,10 @@ test.py
 .DS_Store
 /main.dist
 main.spec
+*.py
+requirements.txt
+README.md
+pygameUtils.py
+player.py
+main.spec
+main.py

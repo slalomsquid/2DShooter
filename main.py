@@ -14,25 +14,74 @@ pygame.display.set_caption("Platformer Example")
 class Block():
     def __init__(self, x, y, size_x, size_y, color=(0, 255, 255), texture=None):
         super().__init__()
-        self.x = x
-        self.y = y
+        self.rect = pygame.Rect(x, y, size_x, size_y)
         self.size_x = size_x
         self.size_y = size_y
         self.color = color
         self.texture = texture
 
-# Only run if is the ran file, not if imported as a module
-if __name__ == "__main__":
+def bullet_movement(bullets):
+    for bullet in bullets[:]:
+        bullet.x += 5
 
-    def shooting():
-        x = 0
+def handle_movement(player, rectangles, keys):
+    dx = 0
+    dy = 0
+
+    if any(keys[k] for k in keybinds.up):
+        dy -= 5
+    if any(keys[k] for k in keybinds.down):
+        dy += 5
+    if any(keys[k] for k in keybinds.left):
+        dx -= 5
+    if any(keys[k] for k in keybinds.right):
+        dx += 5
+
+    # Try X movement
+    if dx != 0:
+        new_rect = player.rect.move(dx, 0)
+        if not any(obj.colliderect(new_rect) for obj in rectangles):
+            player.rect = new_rect
+
+    # Try Y movement
+    if dy != 0:
+        new_rect = player.rect.move(0, dy)
+        if not any(obj.colliderect(new_rect) for obj in rectangles):
+            player.rect = new_rect
+
+def draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies):
+    screen.fill((0, 0, 0))
+    for block in blocks:
+        pygame.draw.rect(screen, block.color, block.rect)
+
+    pygame.draw.rect(screen, "red", player.rect)
+    for enemy in enemies:
+        pygame.draw.rect(screen, "red", enemy.rect)
+    screen.blit(player_surface, (0, 0))
+
+    for enemy_surface in enemy_surfaces:
+        screen.blit(enemy_surface, (0, 0))
+    
+    for bullet in bullets:
+        pygame.draw.rect(screen, "white", bullet)
+
+    pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
+
+    render_text(f"FPS: {int(clock.get_fps())}", (0, 0), constants.WHITE, screen, size=30)
+
+    pygame.display.update()
+
+def main():
 
     blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
-
 
     enemies = [Enemy(constants.ORIGIN[0]+50, constants.ORIGIN[1], 20, 20)]
 
     player = Player(constants.ORIGIN[0]+20, constants.ORIGIN[1], 20, 20)
+
+    bullets = []
+
+    rectangles = []
 
     mouse_pos = (0, 0)
     mouse_rel = (0, 0)
@@ -42,11 +91,6 @@ if __name__ == "__main__":
     while running:
 
         delta_time = clock.tick(constants.FPS) / 1000.0
-
-        # Pre frame logic
-
-        old_x, old_y = player.x, player.y
-        player_moved = False
 
         # Event handling
 
@@ -60,38 +104,21 @@ if __name__ == "__main__":
                     mouse_rel = event.rel
                     player.handle_mouse(mouse_pos, mouse_rel, delta_time)       
                 case pygame.KEYDOWN:
-                    if pygame.KEYDOWN == pygame.K_SPACE:
-                        shooting()
+                    if event.key == pygame.K_SPACE:
+                        bullet = pygame.Rect(player.x, player.y, 10, 5)
+                        bullets.append(bullet)
         
         # Input handling
-
-        keys = pygame.key.get_pressed()
-
-        actions = []
-
         held_actions = []
-
-        if any(keys[k] for k in keybinds.exit):
-            held_actions.append("exit")
-        if any(keys[k] for k in keybinds.up):
-            held_actions.append("up")
-        if any(keys[k] for k in keybinds.down):
-            held_actions.append("down")
-        if any(keys[k] for k in keybinds.left):
-            held_actions.append("left")
-        if any(keys[k] for k in keybinds.right):
-            held_actions.append("right")
-        if any(keys[k] for k in keybinds.shift):
-            held_actions.append("shift")
 
         if held_actions:
             if "exit" in held_actions:
                 running = False
-
-
-
-    # Input handling
-        player_moved = player.handle_held(held_actions, delta_time)
+        keys = pygame.key.get_pressed()
+        if any(keys[k] for k in keybinds.exit):
+            held_actions.append("exit")
+        if any(keys[k] for k in keybinds.shift):
+            held_actions.append("shift")
 
         # Frame process logic
 
@@ -103,35 +130,16 @@ if __name__ == "__main__":
             tmp_surface = enemy.process((player.x, player.y), delta_time)
             if tmp_surface:
                 enemy_surfaces.append(tmp_surface)
-
-        # Move collision from individual classes
-        if player_moved:
-            if player.x < 0 or player.x > constants.WIDTH or player.y < 0 or player.y > constants.HEIGHT:
-                player.x, player.y = old_x, old_y
-            for block in blocks:
-                if player.x + player.size_x//2 > block.x and player.x - player.size_x//2 < block.x + block.size_x and player.y + player.size_y//2 > block.y and player.y - player.size_y//2 < block.y + block.size_y:
-                    player.x, player.y = old_x, old_y
-                    break
-            for enemy in enemies:
-                if player.x + player.size_x//2 > enemy.x - enemy.size_x//2 and player.x - player.size_x//2 < enemy.x + enemy.size_x//2 and player.y + player.size_y//2 > enemy.y - enemy.size_y//2 and player.y - player.size_y//2 < enemy.y + enemy.size_y//2:
-                    player.x, player.y = old_x, old_y
-                    break
-
+        
+        rectangles = [block.rect for block in blocks] + [enemy.rect for enemy in enemies]
 
         # Render logic
+        handle_movement(player, rectangles, keys)
+        player.sync_player()
+        bullet_movement(bullets)
+        draw(player_surface, blocks, enemy_surfaces, mouse_pos, bullets, player, enemies)
 
-        screen.fill((0, 0, 0))
 
-        for block in blocks:
-            pygame.draw.rect(screen, block.color, (block.x, block.y, block.size_x, block.size_y))
+if __name__ == "__main__":
+    main()
 
-        screen.blit(player_surface, (0, 0))
-
-        for enemy_surface in enemy_surfaces:
-            screen.blit(enemy_surface, (0, 0))
-
-        pygame.draw.circle(screen, (255, 255, 255), mouse_pos, 5)
-
-        render_text(f"FPS: {int(clock.get_fps())}", (0, 0), constants.WHITE, screen, size=30)
-
-        pygame.display.update()

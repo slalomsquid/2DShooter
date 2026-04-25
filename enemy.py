@@ -4,8 +4,9 @@ from pygameUtils import *
 class Enemy():
     def __init__(self, x, y, size_x, size_y, color=(255, 50, 50), texture=None, speed=200):
         super().__init__()
-        self.x = x
-        self.y = y
+        self.rect = pygame.Rect(x, y, size_x, size_y)
+        self.x = self.rect.centerx
+        self.y = self.rect.centery
         self.size_x = size_x
         self.size_y = size_y
         self.color = color

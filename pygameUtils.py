@@ -176,7 +176,7 @@ def move_towards_angle(current : float, target : float, max_distance_delta : flo
 ### Other ###
 # based on 'rectanglesToArray' by Marty on https://stackoverflow.com/a/25193953
 # Retrieved 2026-04-26, License - CC BY-SA 3.0
-def get_rectangles(grid):
+def get_rectangles(grid, size):
     if not grid or not grid[0]:
         return []
 
@@ -206,7 +206,7 @@ def get_rectangles(grid):
                     for j in range(c, c + w):
                         visited[i][j] = True
                 
-                rects.append({'x': c, 'y': r, 'w': w, 'h': h})
+                rects.append((c*size, r*size, w*size, h*size))
     return rects
 
 

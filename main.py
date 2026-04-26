@@ -1,10 +1,10 @@
-import pygame
+import pygame, keybinds, constants
 from pygameUtils import *
-import keybinds, constants
 from player import Player
 from enemy import Enemy
 from bullet import Bullet
 from block import Block
+from game_map import Game_Map
 
 pygame.init()
 clock = pygame.time.Clock()
@@ -12,10 +12,13 @@ clock = pygame.time.Clock()
 SCREEN = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
 pygame.display.set_caption("Platformer Example")
 
-def draw(blocks=[], enemies=[], bullets=[], player=None, offset_x=0, offset_y=0):
-        SCREEN.fill((0, 0, 0))
+def draw(game_map = None, blocks=[], enemies=[], bullets=[], player=None, offset_x=0, offset_y=0):
+        SCREEN.fill(constants.BLACK)
 
         surfaces = []
+
+        if (new_surf := game_map.draw(offset_x, offset_y)): 
+            surfaces.append(new_surf)
 
         for block in blocks:
             if (new_surf := block.draw(offset_x, offset_y)): 
@@ -39,8 +42,19 @@ def draw(blocks=[], enemies=[], bullets=[], player=None, offset_x=0, offset_y=0)
         pygame.display.update()
 
 def main():
+
     offset_x = 0
     offset_y = 0
+
+    map_array = [
+        [0,0,0,0],
+        [0,1,1,0],
+        [0,1,1,1],
+        [0,0,0,0]
+    ]
+
+    game_map = Game_Map(map_array, 10, constants.BLUE)
+
     blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
 
     enemies = [Enemy(constants.ORIGIN[0]+50, constants.ORIGIN[1], 20, 20)]
@@ -88,6 +102,9 @@ def main():
         
         rect_map = {obj: obj.rect for obj in (blocks + enemies)}
 
+        for i, rect in enumerate(game_map.rects):
+            rect_map[f"tile_{i}"] = rect
+
         dx, dy = player.handle_movement(keys, delta_time, rect_map)
 
         if player.x + dx < constants.SCROLL_MARGIN:
@@ -120,7 +137,7 @@ def main():
 
         # Render logic
 
-        draw(player=player, enemies=enemies, blocks=blocks, bullets=bullets, offset_x=offset_x, offset_y=offset_y)
+        draw(game_map=game_map, player=player, enemies=enemies, blocks=blocks, bullets=bullets, offset_x=offset_x, offset_y=offset_y)
 
 if __name__ == "__main__":
     main()

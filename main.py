@@ -82,7 +82,7 @@ def main():
                 case pygame.QUIT:
                     running = False
                 case pygame.MOUSEMOTION:
-                    mouse_pos = event.pos
+                    mouse_pos = (event.pos[0] + offset_x, event.pos[1] + offset_y)
                     mouse_rel = event.rel
                     player.handle_mouse(mouse_pos, mouse_rel, delta_time)       
                 case pygame.KEYDOWN:
@@ -115,18 +115,19 @@ def main():
         actual_dy = player.y - old_y
 
         # Horizontal Scroll
-        if player.x < constants.SCROLL_MARGIN and actual_dx < 0:
+        # Subtract offset to get screen pos
+        if player.x - offset_x < constants.SCROLL_MARGIN and actual_dx < 0:
             # Only move offset if player is at the LEFT margin and moving LEFT
             offset_x += actual_dx
-        elif player.x > constants.WIDTH - constants.SCROLL_MARGIN and actual_dx > 0:
+        elif player.x - offset_x > constants.WIDTH - constants.SCROLL_MARGIN and actual_dx > 0:
             # Only move offset if player is at the RIGHT margin and moving RIGHT
             offset_x += actual_dx
 
         # Vertical Scroll
-        if player.y < constants.SCROLL_MARGIN and actual_dy < 0:
+        if player.y - offset_y < constants.SCROLL_MARGIN and actual_dy < 0:
             # Only move offset if player is at the TOP margin and moving UP
             offset_y += actual_dy
-        elif player.y > constants.HEIGHT - constants.SCROLL_MARGIN and actual_dy > 0:
+        elif player.y - offset_y > constants.HEIGHT - constants.SCROLL_MARGIN and actual_dy > 0:
             # Only move offset if player is at the BOTTOM margin and moving DOWN
             offset_y += actual_dy
 

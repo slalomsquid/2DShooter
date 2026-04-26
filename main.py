@@ -1,4 +1,4 @@
-import pygame, keybinds, constants
+import constants, keybinds, pygame
 from pygameUtils import *
 from player import Player
 from enemy import Enemy

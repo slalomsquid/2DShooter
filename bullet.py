@@ -1,5 +1,5 @@
-from pygameUtils import *
 import constants
+from pygameUtils import *
 
 class Bullet():
     def __init__(self, x, y, rotation, radius, color=(255, 255, 0), texture=None, velocity=300, max_dist = 500):

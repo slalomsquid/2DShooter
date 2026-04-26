@@ -1,4 +1,3 @@
-import keybinds
 from pygameUtils import *
 
 class Enemy():

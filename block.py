@@ -1,5 +1,5 @@
-from pygameUtils import *
 import constants
+from pygameUtils import *
 
 class Block():
     def __init__(self, x, y, size_x, size_y, color=(0, 255, 255), texture=None):

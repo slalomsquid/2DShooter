@@ -1,6 +1,5 @@
-import keybinds
+import constants, keybinds
 from pygameUtils import *
-import constants
 
 class Player():
     def __init__(self, x, y, size_x, size_y, color=(255, 50, 50), texture=None, speed=200):

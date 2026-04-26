@@ -90,6 +90,8 @@ def main():
                         hit_method(bullet.velocity)
                     # Delete on collision
                     bullets.remove(bullet)
+            if bullet.traveled > bullet.max_dist:
+                bullets.remove(bullet)
 
         # Render logic
 

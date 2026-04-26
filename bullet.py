@@ -2,7 +2,7 @@ from pygameUtils import *
 import constants
 
 class Bullet():
-    def __init__(self, x, y, rotation, radius, color=(255, 255, 0), texture=None, velocity=300):
+    def __init__(self, x, y, rotation, radius, color=(255, 255, 0), texture=None, velocity=300, max_dist = 500):
         super().__init__()
         self.rect = pygame.Rect(x, y, radius * 2, radius * 2)
         self.rect.center = (x, y)
@@ -13,10 +13,13 @@ class Bullet():
         self.texture = texture
         self.velocity = velocity
         self.rotation = rotation
+        self.max_dist = max_dist
+        self.traveled = 0
 
     def process(self, delta_time):
         self.x, self.y = move_at_angle(np.array([self.x, self.y]), self.rotation, self.velocity * delta_time)
         self.rect.center = (self.x, self.y)
+        self.traveled += self.velocity * delta_time
         # Use 1 to invert the values because rect cannot be hashed but object can
         # hit_rect = self.rect.collidedict(rectangle_dictionary, 1)
         # if hit_rect:

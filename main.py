@@ -109,7 +109,7 @@ def main():
             surfaces.append(new_surf)
 
         for bullet in bullets[:]:
-            if (new_surf := bullet.draw(delta_time)): 
+            if (new_surf := bullet.draw(offset_x, offset_y)): 
                 surfaces.append(new_surf)
 
         for surface in surfaces:

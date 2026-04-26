@@ -110,14 +110,7 @@ class Player():
 
         pygame.draw.polygon(surface, (255, 255, 255, 50), poly)
 
-        # draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x, self.y))
-
-        draw_rotated_rect(surface, self.color,
-    (self.x - self.size_x//2 - offset_x,
-     self.y - self.size_y//2 - offset_y,
-     self.size_x, self.size_y),
-    self.rotation,
-    (self.x - offset_x, self.y - offset_y))
+        draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x - offset_x, self.y - offset_y))
 
         return surface
     

@@ -5,12 +5,66 @@ from enemy import Enemy
 from bullet import Bullet
 from block import Block
 from game_map import Game_Map
+from os import listdir
+from os.path import isfile, join
 
 pygame.init()
 clock = pygame.time.Clock()
 
 SCREEN = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
 pygame.display.set_caption("Platformer Example")
+
+def flip(sprites):
+    return [pygame.transform.flip(sprite, True, False) for sprite in sprites]
+
+def load_sprite_sheets(dir1, dir2, width, height, direction=False):
+    path = join(dir1, dir2)
+    images = [f for f in listdir(path) if isfile(join(path, f))]
+
+    all_sprites = {}
+
+    for image in images:
+        sprite_sheet = pygame.image.load(join(path, image)).convert_alpha()
+
+        sprites = []
+
+        for i in range(sprite_sheet.get_width() // width):
+            surface = pygame.Surface((width, height), pygame.SRCALPHA, 32)
+            rect = pygame.Rect(i * width, 0, width, height)
+            surface.blit(sprite_sheet, (0, 0), rect)
+            sprites.append(pygame.transform.scale2x(surface))
+        
+        if direction:
+            all_sprites[image.replace(".png", "") + "_right"] = sprites
+            all_sprites[image.replace(".png", "") + "_left"] = flip(sprites)
+
+        else:
+            all_sprites[image.replace(".png", "")] = sprites
+    return all_sprites
+
+def background_scroll(player, offset_x, offset_y ,actual_dx, actual_dy, mouse_pos):
+    # Horizontal Scroll
+    # Subtract offset to get screen pos
+    if player.x - offset_x < constants.SCROLL_MARGIN and actual_dx < 0:
+        # Only move offset if player is at the LEFT margin and moving LEFT
+        offset_x += actual_dx
+        mouse_pos[0] += actual_dx
+    elif player.x - offset_x > constants.WIDTH - constants.SCROLL_MARGIN and actual_dx > 0:
+        # Only move offset if player is at the RIGHT margin and moving RIGHT
+        offset_x += actual_dx
+        mouse_pos[0] += actual_dx
+
+    # Vertical Scroll
+    if player.y - offset_y < constants.SCROLL_MARGIN and actual_dy < 0:
+        # Only move offset if player is at the TOP margin and moving UP
+        offset_y += actual_dy
+        mouse_pos[1] += actual_dy
+    elif player.y - offset_y > constants.HEIGHT - constants.SCROLL_MARGIN and actual_dy > 0:
+        # Only move offset if player is at the BOTTOM margin and moving DOWN
+        offset_y += actual_dy
+        mouse_pos[1] += actual_dy
+    
+    return offset_x, offset_y
 
 def draw(game_map = None, blocks=[], enemies=[], bullets=[], player=None, offset_x=0, offset_y=0):
         SCREEN.fill(constants.BLACK)
@@ -58,15 +112,17 @@ def main():
     game_map = Game_Map(map_array, 10, constants.BLUE)
 
     blocks = [Block(100, 100, 50, 50), Block(200, 150, 50, 50)]
-
-    enemies = [Enemy(constants.ORIGIN[0]+50, constants.ORIGIN[1], 20, 20)]
-
-    player = Player(constants.ORIGIN[0]+20, constants.ORIGIN[1], 20, 20)
+    ENEMY_SPRITES = load_sprite_sheets("MainCharacters", "VirtualGuy", 32, 32, True)
+    enemies = [Enemy(constants.ORIGIN[0]+50, constants.ORIGIN[1], 20, 20, ENEMY_SPRITES)]
+    PLAYER_SPRITES = load_sprite_sheets("MainCharacters", "MaskDude", 32, 32, True)
+    player = Player(constants.ORIGIN[0]-20, constants.ORIGIN[1], 20, 20, PLAYER_SPRITES)
 
     bullets = []
 
     mouse_pos = (0, 0)
     mouse_rel = (0, 0)
+
+
 
     running = True
 
@@ -119,27 +175,6 @@ def main():
         actual_dx = player.x - old_x
         actual_dy = player.y - old_y
 
-        # Horizontal Scroll
-        # Subtract offset to get screen pos
-        if player.x - offset_x < constants.SCROLL_MARGIN and actual_dx < 0:
-            # Only move offset if player is at the LEFT margin and moving LEFT
-            offset_x += actual_dx
-            mouse_pos[0] += actual_dx
-        elif player.x - offset_x > constants.WIDTH - constants.SCROLL_MARGIN and actual_dx > 0:
-            # Only move offset if player is at the RIGHT margin and moving RIGHT
-            offset_x += actual_dx
-            mouse_pos[0] += actual_dx
-
-        # Vertical Scroll
-        if player.y - offset_y < constants.SCROLL_MARGIN and actual_dy < 0:
-            # Only move offset if player is at the TOP margin and moving UP
-            offset_y += actual_dy
-            mouse_pos[1] += actual_dy
-        elif player.y - offset_y > constants.HEIGHT - constants.SCROLL_MARGIN and actual_dy > 0:
-            # Only move offset if player is at the BOTTOM margin and moving DOWN
-            offset_y += actual_dy
-            mouse_pos[1] += actual_dy
-
         player.process(mouse_pos, mouse_rel, offset_x, offset_y, delta_time=delta_time)
 
         for bullet in bullets[:]:
@@ -159,7 +194,9 @@ def main():
                 bullets.remove(bullet)
 
         # Render logic
-
+        offset_x, offset_y = background_scroll(player, offset_x, offset_y, actual_dx, actual_dy, mouse_pos)
+        player.update_sprite(constants.FPS)
+        enemy.update_sprite(constants.FPS)
         draw(game_map=game_map, player=player, enemies=enemies, blocks=blocks, bullets=bullets, offset_x=offset_x, offset_y=offset_y)
 
 if __name__ == "__main__":

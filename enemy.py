@@ -1,11 +1,12 @@
 from pygameUtils import *
 
 class Enemy():
-    def __init__(self, x, y, size_x, size_y, color=(255, 50, 50), texture=None, speed=200):
+    def __init__(self, x, y, size_x, size_y, sprite, color=(255, 50, 50), texture=None, speed=200):
         super().__init__()
         self.rect = pygame.Rect(x, y, size_x, size_y)
-        self.x = self.rect.centerx
-        self.y = self.rect.centery
+        self.rect.center = (x, y)
+        self.x = x
+        self.y = y
         self.size_x = size_x
         self.size_y = size_y
         self.color = color
@@ -21,6 +22,13 @@ class Enemy():
         self.time_since_seen = 10
         self.last_seen_player_pos = False
         self.times_checked = 0
+        self.sprite_direction = "left"
+        self.animation_count = 0
+        self.ANIMATION_DELAY = 3
+        self.SPRITES = sprite
+        self.attacked = False
+        self.vel = "idle"
+        self.hit_count = 0
 
     def process(self, player_pos, delta_time, offset_x, offset_y):
         if is_point_in_triangle(player_pos, self.view_cone[0], self.view_cone[1], self.view_cone[2]):
@@ -48,11 +56,39 @@ class Enemy():
         self.time_since_seen += delta_time
     
     def hit(self, damage):
+        self.attacked = True
         print("Hit")
         # self.health -= damage
         # if self.health <= 0:
         #     # Handle enemy death (e.g., remove from game, play animation, etc.)
         #     pass
+
+    def update_sprite(self, fps):
+        sprite_sheet = "idle"
+        if self.attacked:
+            sprite_sheet = "hit"
+
+        elif self.vel != "idle":
+            sprite_sheet = "run"
+        
+        if self.hit:
+            self.hit_count += 1 
+        if self.hit_count > fps * 5:
+            self.attacked = False
+            self.hit_count = 0
+        
+        sprite_sheet_name = sprite_sheet + "_" + self.sprite_direction
+        sprites = self.SPRITES[sprite_sheet_name]
+        sprite_index = (self.animation_count // self.ANIMATION_DELAY) % len(sprites)
+        self.sprite = sprites[sprite_index]
+        self.animation_count += 1
+
+        self.update()
+
+    def update(self):
+        self.rect.center = (self.x, self.y)
+        self.rect = self.sprite.get_rect(topleft=(self.rect.x, self.rect.y))
+        self.mask = pygame.mask.from_surface(self.sprite)
 
     def draw(self, offset_x, offset_y):
 
@@ -65,8 +101,8 @@ class Enemy():
 
         pygame.draw.polygon(surface, (255, 255, 255, 50), poly)
 
-        draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x - offset_x, self.y - offset_y))
-
+        #draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x - offset_x, self.y - offset_y))
+        surface.blit(self.sprite, (self.rect.x - offset_x, self.rect.y - offset_y))
 
         return surface
 

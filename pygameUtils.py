@@ -173,5 +173,42 @@ def move_towards_angle(current : float, target : float, max_distance_delta : flo
         return (current - max_distance_delta) % 360
     return target
 
+### Other ###
+# based on 'rectanglesToArray' by Marty on https://stackoverflow.com/a/25193953
+# Retrieved 2026-04-26, License - CC BY-SA 3.0
+def get_rectangles(grid):
+    if not grid or not grid[0]:
+        return []
+
+    rows, cols = len(grid), len(grid[0])
+    rects = []
+    visited = [[False for _ in range(cols)] for _ in range(rows)]
+
+    for r in range(rows):
+        for c in range(cols):
+            # Only process if it's a '1' and hasn't been part of a previous rect
+            if grid[r][c] == 1 and not visited[r][c]:
+                # 1. Expand Width: Scan right to find the maximum possible width
+                w = 0
+                while c + w < cols and grid[r][c + w] == 1 and not visited[r][c + w]:
+                    w += 1
+                
+                # 2. Expand Height: Check subsequent rows for the same width
+                h = 1
+                while r + h < rows:
+                    if all(grid[r + h][c + i] == 1 and not visited[r + h][c + i] for i in range(w)):
+                        h += 1
+                    else:
+                        break
+                
+                # 3. Mark cells as visited so they aren't counted twice
+                for i in range(r, r + h):
+                    for j in range(c, c + w):
+                        visited[i][j] = True
+                
+                rects.append({'x': c, 'y': r, 'w': w, 'h': h})
+    return rects
+
+
 if __name__ == "__main__":
     print("This is a utility file, not meant to be run directly")

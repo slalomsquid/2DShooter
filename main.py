@@ -82,13 +82,17 @@ def main():
                 case pygame.QUIT:
                     running = False
                 case pygame.MOUSEMOTION:
-                    mouse_pos = (event.pos[0] + offset_x, event.pos[1] + offset_y)
+                    mouse_pos = [event.pos[0] + offset_x, event.pos[1] + offset_y]
                     mouse_rel = event.rel
                     player.handle_mouse(mouse_pos, mouse_rel, delta_time)       
                 case pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE:
+                    if any(event.key == key for key in keybinds.shoot):
                         bullet = Bullet(player.rect.centerx, player.rect.centery, player.rotation, 5)
                         bullets.append(bullet)
+
+                    if event.key == pygame.K_SPACE:
+                        pass
+
         
         # Input handling
 
@@ -99,6 +103,7 @@ def main():
 
         # Frame process logic
 
+        # Process enemies
         for enemy in enemies:
             enemy.process((player.x, player.y), delta_time, offset_x, offset_y) 
         
@@ -109,7 +114,7 @@ def main():
 
         old_x, old_y = player.x, player.y
 
-        dx, dy = player.handle_movement(keys, delta_time, rect_map)
+        player.handle_movement(keys, delta_time, rect_map)
 
         actual_dx = player.x - old_x
         actual_dy = player.y - old_y
@@ -119,20 +124,21 @@ def main():
         if player.x - offset_x < constants.SCROLL_MARGIN and actual_dx < 0:
             # Only move offset if player is at the LEFT margin and moving LEFT
             offset_x += actual_dx
+            mouse_pos[0] += actual_dx
         elif player.x - offset_x > constants.WIDTH - constants.SCROLL_MARGIN and actual_dx > 0:
             # Only move offset if player is at the RIGHT margin and moving RIGHT
             offset_x += actual_dx
+            mouse_pos[0] += actual_dx
 
         # Vertical Scroll
         if player.y - offset_y < constants.SCROLL_MARGIN and actual_dy < 0:
             # Only move offset if player is at the TOP margin and moving UP
             offset_y += actual_dy
+            mouse_pos[1] += actual_dy
         elif player.y - offset_y > constants.HEIGHT - constants.SCROLL_MARGIN and actual_dy > 0:
             # Only move offset if player is at the BOTTOM margin and moving DOWN
             offset_y += actual_dy
-
-
-        player.sync_player()
+            mouse_pos[1] += actual_dy
 
         player.process(mouse_pos, mouse_rel, offset_x, offset_y, delta_time=delta_time)
 
@@ -147,6 +153,8 @@ def main():
                         hit_method(bullet.velocity)
                     # Delete on collision
                     bullets.remove(bullet)
+                    # Brevents rare instance where bullet is removed twice causing crash
+                    break
             if bullet.traveled > bullet.max_dist:
                 bullets.remove(bullet)
 

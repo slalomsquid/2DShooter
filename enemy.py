@@ -17,11 +17,35 @@ class Enemy():
         self.health = 100
         self.view_distance = 100
         self.fov = 60
+        self.view_cone = create_view_cone_polygon(self)
+        self.time_since_seen = 10
+        self.last_seen_player_pos = False
+        self.times_checked = 0
 
     def process(self, player_pos, delta_time, offset_x, offset_y):
-        self.target_rotation = vector_to_angle(np.array(player_pos) - np.array([self.x, self.y]))
+        if is_point_in_triangle(player_pos, self.view_cone[0], self.view_cone[1], self.view_cone[2]):
+            self.time_since_seen = 0.0
+            self.last_seen_player_pos = player_pos
+            self.times_checked = 0
+            self.target_rotation = vector_to_angle(np.array(player_pos) - np.array([self.x, self.y]))
+        else:
+            if self.time_since_seen < 10:
+                # Check if last seen exists
+                if self.last_seen_player_pos:
+                    if self.times_checked == 0 or 3:
+                        self.target_rotation = vector_to_angle(np.array(self.last_seen_player_pos) - np.array([self.x, self.y]))
+                    if self.times_checked == 1:
+                        self.target_rotation = vector_to_angle(np.array(self.last_seen_player_pos) - np.array([self.x, self.y])) + 30
+                    if self.times_checked == 2:
+                        self.target_rotation = vector_to_angle(np.array(self.last_seen_player_pos) - np.array([self.x, self.y])) - 30
+                    if self.times_checked == 4:
+                        self.target_rotation = vector_to_angle(np.array(self.last_seen_player_pos) - np.array([self.x, self.y])) + 180
+                if self.rotation == self.target_rotation:
+                    self.times_checked += 1
+                # if self.rotation == self.target_rotation:
+                #     self.target_rotation += 180
         self.rotation = move_towards_angle(self.rotation, self.target_rotation, self.max_rotation_speed * delta_time)
-        # self.rotation = lerp_angle(self.rotation, self.target_rotation, delta_time*2)
+        self.time_since_seen += delta_time
     
     def hit(self, damage):
         print("Hit")
@@ -35,13 +59,14 @@ class Enemy():
         # Create temporary overlay to allow transparency
         surface = pygame.Surface((constants.WIDTH, constants.HEIGHT), pygame.SRCALPHA)
 
-        poly = create_view_cone_polygon(self)
+        self.view_cone = create_view_cone_polygon(self)
 
-        poly = [(px - offset_x, py - offset_y) for (px, py) in poly]
+        poly = [(px - offset_x, py - offset_y) for (px, py) in self.view_cone]
 
         pygame.draw.polygon(surface, (255, 255, 255, 50), poly)
-        
-        draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x, self.y))
+
+        draw_rotated_rect(surface, self.color, (self.x - self.size_x//2 - offset_x, self.y - self.size_y//2 - offset_y, self.size_x, self.size_y), self.rotation, (self.x - offset_x, self.y - offset_y))
+
 
         return surface
 

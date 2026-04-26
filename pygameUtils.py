@@ -48,20 +48,6 @@ def draw_alpha_line(color, alpha, start, end, width, canv):
     # Blit it to the main canvas at the start position
     canv.blit(line_surf, start)
 
-def create_view_cone_polygon(self):
-    view_left = self.rotation - self.fov/2
-    view_right = self.rotation + self.fov/2
-
-    view_left_direction = angle_to_vector(view_left)
-    view_right_direction = angle_to_vector(view_right)
-
-    points = [
-        (self.x, self.y), 
-        (self.x + view_left_direction[0]*self.view_distance, self.y + view_left_direction[1]*self.view_distance), 
-        (self.x + view_right_direction[0]*self.view_distance, self.y + view_right_direction[1]*self.view_distance)
-    ]
-    return points
-
 def draw_rotated_rect(screen, color, rect_dims, angle, center_pos):
     # Create a surface with an alpha
     temp_surf = pygame.Surface((rect_dims[2], rect_dims[3]), pygame.SRCALPHA)
@@ -209,6 +195,31 @@ def get_rectangles(grid, size):
                 rects.append((c*size, r*size, w*size, h*size))
     return rects
 
+def is_point_in_triangle(pos, p1, p2, p3):
+    def get_area(a, b, c):
+        return abs((a[0] * (b[1] - c[1]) + b[0] * (c[1] - a[1]) + c[0] * (a[1] - b[1])) / 2.0)
+
+    total_area = get_area(p1, p2, p3)
+    area1 = get_area(pos, p2, p3)
+    area2 = get_area(p1, pos, p3)
+    area3 = get_area(p1, p2, pos)
+
+    # Use a small epsilon for float precision
+    return abs(total_area - (area1 + area2 + area3)) < 0.1
+
+def create_view_cone_polygon(self):
+    view_left = self.rotation - self.fov/2
+    view_right = self.rotation + self.fov/2
+
+    view_left_direction = angle_to_vector(view_left)
+    view_right_direction = angle_to_vector(view_right)
+
+    points = [
+        (self.x, self.y), 
+        (self.x + view_left_direction[0]*self.view_distance, self.y + view_left_direction[1]*self.view_distance), 
+        (self.x + view_right_direction[0]*self.view_distance, self.y + view_right_direction[1]*self.view_distance)
+    ]
+    return points
 
 if __name__ == "__main__":
     print("This is a utility file, not meant to be run directly")

@@ -77,8 +77,6 @@ class Player():
                 # self.y_vel = dy  
 
         self.rect.center = (self.x, self.y)
-
-        return dx, dy 
         
     def handle_mouse(self, mouse_pos, mouse_rel, delta_time):
         pass

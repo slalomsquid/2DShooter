@@ -12,6 +12,31 @@ clock = pygame.time.Clock()
 SCREEN = pygame.display.set_mode((constants.WIDTH, constants.HEIGHT))
 pygame.display.set_caption("Platformer Example")
 
+def draw(blocks=[], enemies=[], bullets=[], player=None, offset_x=0, offset_y=0):
+        SCREEN.fill((0, 0, 0))
+
+        surfaces = []
+
+        for block in blocks:
+            if (new_surf := block.draw(offset_x, offset_y)): 
+                surfaces.append(new_surf)
+
+        for enemy in enemies:
+            if (new_surf := enemy.draw(offset_x, offset_y)): 
+                surfaces.append(new_surf)
+
+        if (new_surf := player.draw(offset_x, offset_y)): 
+            surfaces.append(new_surf)
+
+        for bullet in bullets[:]:
+            if (new_surf := bullet.draw(offset_x, offset_y)): 
+                surfaces.append(new_surf)
+
+        for surface in surfaces:
+            if surface:
+                SCREEN.blit(surface, (0, 0))
+
+        pygame.display.update()
 
 def main():
     offset_x = 0
@@ -95,30 +120,7 @@ def main():
 
         # Render logic
 
-        SCREEN.fill((0, 0, 0))
-
-        surfaces = []
-
-        for block in blocks:
-            if (new_surf := block.draw(offset_x, offset_y)): 
-                surfaces.append(new_surf)
-
-        for enemy in enemies:
-            if (new_surf := enemy.draw(offset_x, offset_y)): 
-                surfaces.append(new_surf)
-
-        if (new_surf := player.draw(offset_x, offset_y)): 
-            surfaces.append(new_surf)
-
-        for bullet in bullets[:]:
-            if (new_surf := bullet.draw(offset_x, offset_y)): 
-                surfaces.append(new_surf)
-
-        for surface in surfaces:
-            if surface:
-                SCREEN.blit(surface, (0, 0))
-
-        pygame.display.update()
+        draw(player=player, enemies=enemies, blocks=blocks, bullets=bullets, offset_x=offset_x, offset_y=offset_y)
 
 if __name__ == "__main__":
     main()

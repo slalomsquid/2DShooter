@@ -47,10 +47,12 @@ def main():
     offset_y = 0
 
     map_array = [
-        [0,0,0,0],
-        [0,1,1,0],
-        [0,1,1,1],
-        [0,0,0,0]
+        [0,1,1,1,1,1,1,1,1,1,1],
+        [0,1,0,0,0,0,0,0,0,0,1],
+        [0,1,0,0,0,0,0,0,0,0,1],
+        [0,1,0,0,0,0,0,0,0,0,1],
+        [0,1,0,0,0,0,0,0,0,0,1],
+        [0,1,1,1,1,0,0,0,0,1,1]
     ]
 
     game_map = Game_Map(map_array, 10, constants.BLUE)
@@ -105,17 +107,29 @@ def main():
         for i, rect in enumerate(game_map.rects):
             rect_map[f"tile_{i}"] = rect
 
+        old_x, old_y = player.x, player.y
+
         dx, dy = player.handle_movement(keys, delta_time, rect_map)
 
-        if player.x + dx < constants.SCROLL_MARGIN:
-            offset_x += dx
-        elif player.x + dx > constants.WIDTH - constants.SCROLL_MARGIN:
-            offset_x += dx
+        actual_dx = player.x - old_x
+        actual_dy = player.y - old_y
 
-        if player.y + dy < constants.SCROLL_MARGIN:
-            offset_y += dy
-        elif player.y + dy > constants.HEIGHT - constants.SCROLL_MARGIN:
-            offset_y += dy
+        # Horizontal Scroll
+        if player.x < constants.SCROLL_MARGIN and actual_dx < 0:
+            # Only move offset if player is at the LEFT margin and moving LEFT
+            offset_x += actual_dx
+        elif player.x > constants.WIDTH - constants.SCROLL_MARGIN and actual_dx > 0:
+            # Only move offset if player is at the RIGHT margin and moving RIGHT
+            offset_x += actual_dx
+
+        # Vertical Scroll
+        if player.y < constants.SCROLL_MARGIN and actual_dy < 0:
+            # Only move offset if player is at the TOP margin and moving UP
+            offset_y += actual_dy
+        elif player.y > constants.HEIGHT - constants.SCROLL_MARGIN and actual_dy > 0:
+            # Only move offset if player is at the BOTTOM margin and moving DOWN
+            offset_y += actual_dy
+
 
         player.sync_player()
 
